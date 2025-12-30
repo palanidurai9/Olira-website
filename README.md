@@ -1,17 +1,23 @@
-# Olira E-Commerce Website
+# Olira Website
 
-A premium, modern e-commerce platform for "modest made modern" fashion, featuring sarees, kurtis, dresses, and co-ord sets.
+A personalized e-commerce platform for Olira.
 
-## Features
-- Modern, responsive design
-- Product filtering and categories
-- Shopping Cart with side drawer
-- Admin dashboard for product management
-- WhatsApp integration
+## How to Run
 
-## Tech Stack
-- React + Vite
-- TypeScript
-- Tailwind CSS
-- Framer Motion
-- Supabase (Backend/Auth)
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Start the server:
+   ```bash
+   npm run dev
+   ```
+
+## How to Clear Data
+
+To reset dashboard stats (Sales, Orders), run this in your **Supabase SQL Editor**:
+
+```sql
+TRUNCATE TABLE orders CASCADE;
+```
