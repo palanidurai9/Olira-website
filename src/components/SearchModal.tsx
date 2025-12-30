@@ -16,7 +16,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [mounted, setMounted] = useState(false);
     const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(false);
+
 
     useEffect(() => {
         setMounted(true);
@@ -33,7 +33,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     }, [isOpen]);
 
     const fetchProducts = async () => {
-        setLoading(true);
         // data field mapping for joins might depend on exact setup (images:product_images vs just product_images)
         // Adjusting query to be safe, assuming foreign key setup matches the types or standard conventions
         // If product_images is the table name and product_id is the FK.
@@ -45,7 +44,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
         if (!error && data) {
             setProducts(data);
         }
-        setLoading(false);
     };
 
     // Derived Lists
