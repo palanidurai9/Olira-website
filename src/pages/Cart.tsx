@@ -16,7 +16,6 @@ const Cart: React.FC = () => {
 
             <div className="container-custom py-12 flex-grow">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-serif font-bold text-dark">Your Cart</h1>
                     {cart.length > 0 && (
                         <button
                             onClick={clearCart}
@@ -28,11 +27,11 @@ const Cart: React.FC = () => {
                 </div>
 
                 {cart.length === 0 ? (
-                    <div className="text-center py-20 bg-white rounded-lg border border-gray-100 shadow-sm">
-                        <ShoppingBag size={48} className="mx-auto text-gray-300 mb-4" />
-                        <h2 className="text-xl font-medium text-dark mb-2">Your cart is empty</h2>
-                        <p className="text-gray-500 mb-6">Looks like you haven't added anything yet.</p>
-                        <Link to="/shop" className="btn-primary inline-flex items-center">
+                    <div className="flex flex-col items-center justify-center py-32 text-center">
+                        <ShoppingBag size={64} strokeWidth={1} className="text-gray-300 mb-6" />
+                        <h2 className="text-3xl font-serif font-bold text-dark mb-3">Your cart is empty</h2>
+                        <p className="text-gray-500 mb-8 max-w-md">Looks like you haven't added anything yet. Explore our collection to find your perfect style.</p>
+                        <Link to="/shop" className="btn-primary inline-flex items-center px-8 py-3">
                             Start Shopping <ArrowRight size={18} className="ml-2" />
                         </Link>
                     </div>
