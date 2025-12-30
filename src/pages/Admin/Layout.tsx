@@ -49,7 +49,7 @@ const AdminLayout: React.FC = () => {
                 <div className="p-6 border-b border-gray-100 flex items-center justify-center">
                     <Link to="/">
                         {/* Using a smaller version of logo or text for admin sidebar */}
-                        <span className="text-2xl font-serif font-bold text-primary tracking-tight">OLIRA PANEL</span>
+                        <span className="text-2xl font-serif font-bold text-primary tracking-tight">OLIRAA PANEL</span>
                     </Link>
                 </div>
 

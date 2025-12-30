@@ -1,6 +1,6 @@
-# Olira Website
+# Oliraa Website
 
-A personalized e-commerce platform for Olira.
+A personalized e-commerce platform for Oliraa.
 
 ## How to Run
 

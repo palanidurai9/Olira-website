@@ -7,8 +7,8 @@ export default {
     theme: {
         extend: {
             colors: {
-                primary: "#737c60", // OLIRA Green
-                secondary: "#f4c0be", // OLIRA Pink
+                primary: "#737c60", // OLIRAA Green
+                secondary: "#f4c0be", // OLIRAA Pink
                 accent: "#f9f1ee", // Very light background
                 neutral: "#FAFAFA",
                 dark: "#2D3028", // Darker Green/Gray for text

@@ -5,7 +5,7 @@ const Terms: React.FC = () => {
         <div className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
             <h1 className="text-3xl md:text-4xl font-serif text-dark mb-8">Terms of Service</h1>
             <div className="prose max-w-none text-gray-600 space-y-4">
-                <p>Welcome to Olira. By accessing or using our website, you agree to be bound by these Terms of Service.</p>
+                <p>Welcome to Oliraa. By accessing or using our website, you agree to be bound by these Terms of Service.</p>
 
                 <h3 className="text-xl font-bold text-dark mt-6 mb-2">1. Use of Website</h3>
                 <p>You may use our website only for lawful purposes. You are prohibited from violating or attempting to violate the security of the website.</p>

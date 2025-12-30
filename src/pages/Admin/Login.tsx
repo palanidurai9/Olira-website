@@ -41,7 +41,7 @@ const Login: React.FC = () => {
                 </div>
 
                 <h2 className="text-2xl font-serif font-bold text-center text-dark mb-2">Admin Access</h2>
-                <p className="text-center text-gray-500 mb-8 text-sm">Secure login for OLIRA management</p>
+                <p className="text-center text-gray-500 mb-8 text-sm">Secure login for OLIRAA management</p>
 
                 {error && (
                     <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm mb-6 text-center">
@@ -58,7 +58,7 @@ const Login: React.FC = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                            placeholder="admin@olira.com"
+                            placeholder="Enter the Email"
                         />
                     </div>
 

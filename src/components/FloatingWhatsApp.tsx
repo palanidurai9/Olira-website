@@ -13,7 +13,7 @@ const FloatingWhatsApp: React.FC = () => {
 
     // Replace with actual WhatsApp number
     const whatsappNumber = "919876543210";
-    const message = "Hi Olira! I'm interested in your collection.";
+    const message = "Hi Oliraa! I'm interested in your collection.";
 
     const handleClick = () => {
         const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;

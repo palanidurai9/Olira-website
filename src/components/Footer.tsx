@@ -53,7 +53,7 @@ const Footer: React.FC = () => {
             icon: <Mail size={18} />,
             content: (
                 <div className="flex flex-col space-y-3 text-gray-500 text-sm">
-                    <p>Email: hello@olira.com</p>
+                    <p>Email: hello@oliraa.com</p>
                     <p>Phone: +91 98765 43210</p>
                     <p>Mon - Fri: 10:00 AM - 6:00 PM</p>
                     <div className="flex items-center space-x-4 mt-2">
