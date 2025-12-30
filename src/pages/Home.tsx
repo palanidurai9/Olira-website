@@ -106,26 +106,28 @@ const Home: React.FC = () => {
                             </div>
                         ) : (
                             <div className="flex flex-wrap justify-center gap-6">
-                                {categories.map(category => (
-                                    <Link
-                                        key={category.id}
-                                        to={`/shop?category=${category.id}`}
-                                        className="group relative overflow-hidden rounded-xl bg-white shadow-sm hover:shadow-md transition-all w-40 h-40 md:w-56 md:h-64 flex flex-col items-center justify-center text-center p-4 border border-gray-100"
-                                    >
-                                        <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
-                                            {/* If we had category images, we'd use them here. For now, first letter. */}
-                                            {category.image_url ? (
-                                                <img src={category.image_url} alt={category.name} className="w-full h-full object-cover rounded-full" />
-                                            ) : (
-                                                <span className="text-2xl font-serif text-primary font-bold">{category.name.charAt(0)}</span>
-                                            )}
-                                        </div>
-                                        <h3 className="font-medium text-dark group-hover:text-primary transition-colors">{category.name}</h3>
-                                        <span className="text-xs text-gray-400 mt-1 uppercase tracking-wider group-hover:translate-x-1 transition-transform inline-flex items-center">
-                                            Explore <ArrowRight size={12} className="ml-1" />
-                                        </span>
-                                    </Link>
-                                ))}
+                                {categories
+                                    .filter(cat => ['maxi-dress', 'kurti-set', 'tops', 'shirts', 'maternity-dress'].includes(cat.slug))
+                                    .map(category => (
+                                        <Link
+                                            key={category.id}
+                                            to={`/shop?category=${category.slug}`}
+                                            className="group relative overflow-hidden rounded-xl bg-white shadow-sm hover:shadow-md transition-all w-40 h-40 md:w-56 md:h-64 flex flex-col items-center justify-center text-center p-4 border border-gray-100"
+                                        >
+                                            <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">
+                                                {/* If we had category images, we'd use them here. For now, first letter. */}
+                                                {category.image_url ? (
+                                                    <img src={category.image_url} alt={category.name} className="w-full h-full object-cover rounded-full" />
+                                                ) : (
+                                                    <span className="text-2xl font-serif text-primary font-bold">{category.name.charAt(0)}</span>
+                                                )}
+                                            </div>
+                                            <h3 className="font-medium text-dark group-hover:text-primary transition-colors">{category.name}</h3>
+                                            <span className="text-xs text-gray-400 mt-1 uppercase tracking-wider group-hover:translate-x-1 transition-transform inline-flex items-center">
+                                                Explore <ArrowRight size={12} className="ml-1" />
+                                            </span>
+                                        </Link>
+                                    ))}
                             </div>
                         )}
                     </div>

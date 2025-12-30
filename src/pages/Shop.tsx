@@ -26,14 +26,30 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
     useEffect(() => {
-        // Sync with Prop or URL if they change externally (though mainly mount is important)
+        // Sync with Prop or URL if they change externally
         const paramCategory = searchParams.get('category');
+
         if (forcedCategory) {
             setSelectedCategory(forcedCategory);
-        } else if (paramCategory) {
-            setSelectedCategory(paramCategory);
+        } else if (paramCategory && categories.length > 0) {
+            // Handle URL changes - Param can be Slug (Header/Footer) or ID (Home)
+            if (paramCategory === 'all') {
+                setSelectedCategory('all');
+            } else {
+                // 1. Try finding by Slug (Preferred)
+                const matchedSlug = categories.find(c => c.slug === paramCategory);
+                if (matchedSlug) {
+                    setSelectedCategory(matchedSlug.id);
+                } else {
+                    // 2. Fallback: Param might be an ID
+                    const matchedId = categories.find(c => c.id === paramCategory);
+                    if (matchedId) {
+                        setSelectedCategory(matchedId.id);
+                    }
+                }
+            }
         }
-    }, [forcedCategory, searchParams]);
+    }, [forcedCategory, searchParams, categories]);
 
     useEffect(() => {
         fetchData();
@@ -94,15 +110,17 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
                         >
                             All View
                         </button>
-                        {categories.map(cat => (
-                            <button
-                                key={cat.id}
-                                onClick={() => setSelectedCategory(cat.id)}
-                                className={`text-sm uppercase tracking-wide whitespace-nowrap transition-colors ${selectedCategory === cat.id ? 'text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-dark'}`}
-                            >
-                                {cat.name}
-                            </button>
-                        ))}
+                        {categories
+                            .filter(cat => ['maxi-dress', 'kurti-set', 'tops', 'shirts', 'maternity-dress'].includes(cat.slug))
+                            .map(cat => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => setSelectedCategory(cat.id)}
+                                    className={`text-sm uppercase tracking-wide whitespace-nowrap transition-colors ${selectedCategory === cat.id ? 'text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-dark'}`}
+                                >
+                                    {cat.name}
+                                </button>
+                            ))}
                     </div>
 
                     {/* Mobile Filter Button */}
@@ -141,15 +159,17 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
                                     >
                                         All
                                     </button>
-                                    {categories.map(cat => (
-                                        <button
-                                            key={cat.id}
-                                            onClick={() => setSelectedCategory(cat.id)}
-                                            className={`px-3 py-1 text-xs border rounded-full ${selectedCategory === cat.id ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200'}`}
-                                        >
-                                            {cat.name}
-                                        </button>
-                                    ))}
+                                    {categories
+                                        .filter(cat => ['maxi-dress', 'kurti-set', 'tops', 'shirts', 'maternity-dress'].includes(cat.slug))
+                                        .map(cat => (
+                                            <button
+                                                key={cat.id}
+                                                onClick={() => setSelectedCategory(cat.id)}
+                                                className={`px-3 py-1 text-xs border rounded-full ${selectedCategory === cat.id ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200'}`}
+                                            >
+                                                {cat.name}
+                                            </button>
+                                        ))}
                                 </div>
                             </div>
                             <div>

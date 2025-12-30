@@ -7,11 +7,11 @@ import { useLocation } from 'react-router-dom';
  * Place this inside the <Router> but outside of <Routes>.
  */
 const ScrollToTop = () => {
-    const { pathname } = useLocation();
+    const { pathname, search } = useLocation();
 
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, [pathname]);
+    }, [pathname, search]);
 
     return null;
 };

@@ -107,6 +107,48 @@ const Products: React.FC = () => {
 
     // Removed AI generation logic
 
+    const handleResetCategories = async () => {
+        if (!confirm('This will RESET categories to: Maxi Dresses, Kurti Sets, Tops, Shirts, Maternity. Any other UNUSED categories will be deleted. Continue?')) return;
+        setSaving(true);
+        try {
+            const standard = [
+                { name: 'Maxi Dresses', slug: 'maxi-dress' },
+                { name: 'Kurti Sets', slug: 'kurti-set' },
+                { name: 'Tops', slug: 'tops' },
+                { name: 'Shirts', slug: 'shirts' },
+                { name: 'Maternity Dresses', slug: 'maternity-dress' }
+            ];
+
+            // 1. Get all current categories
+            const { data: currentCats } = await supabase.from('categories').select('*');
+
+            // 2. Identify
+            const toDelete = currentCats?.filter(c => !standard.find(s => s.slug === c.slug)) || [];
+            const toAdd = standard.filter(s => !currentCats?.find(c => c.slug === s.slug));
+
+            // 3. Delete unwanted
+            if (toDelete.length > 0) {
+                const ids = toDelete.map(c => c.id);
+                const { error: delError } = await supabase.from('categories').delete().in('id', ids);
+                if (delError) {
+                    alert('Some categories could not be deleted because they have products linked to them. Please reassign those products first.');
+                }
+            }
+
+            // 4. Add missing
+            if (toAdd.length > 0) {
+                await supabase.from('categories').insert(toAdd);
+            }
+
+            await fetchData();
+            alert('Categories synchronized!');
+        } catch (e: any) {
+            alert('Error: ' + e.message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     return (
         <div className="relative">
             {/* Header */}
@@ -327,41 +369,31 @@ const Products: React.FC = () => {
                             {/* Category */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                                <select
-                                    value={currentProduct.category_id || ''}
-                                    onChange={e => setCurrentProduct({ ...currentProduct, category_id: e.target.value })}
-                                    className="w-full p-2 border border-gray-200 rounded-md outline-none bg-white"
-                                >
-                                    <option value="">Select Category</option>
-                                    {categories.map(c => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
-                                    ))}
-                                </select>
-                                {categories.length === 0 ? (
-                                    <div className="mt-2 text-xs text-orange-500 flex items-center gap-2">
-                                        <span>No categories found in database.</span>
-                                        <button
-                                            type="button"
-                                            onClick={async () => {
-                                                const defaults = [
-                                                    { name: 'Sarees', slug: 'sarees' },
-                                                    { name: 'Kurtis', slug: 'kurtis' },
-                                                    { name: 'Dresses', slug: 'dresses' },
-                                                    { name: 'Co-ord Sets', slug: 'coord-sets' },
-                                                    { name: 'Suit Sets', slug: 'suit-sets' }
-                                                ];
-                                                const { error } = await supabase.from('categories').insert(defaults);
-                                                if (error) alert('Failed to create categories: ' + error.message);
-                                                else fetchData();
-                                            }}
-                                            className="text-primary hover:underline font-medium"
-                                        >
-                                            Initialize Defaults
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <p className="text-xs text-gray-400 mt-1">Select a category for this product.</p>
-                                )}
+                                <div className="flex gap-2">
+                                    <select
+                                        value={currentProduct.category_id || ''}
+                                        onChange={e => setCurrentProduct({ ...currentProduct, category_id: e.target.value })}
+                                        className="flex-1 p-2 border border-gray-200 rounded-md outline-none bg-white"
+                                    >
+                                        <option value="">Select Category</option>
+                                        {categories
+                                            .filter(c => ['maxi-dress', 'kurti-set', 'tops', 'shirts', 'maternity-dress'].includes(c.slug))
+                                            .map(c => (
+                                                <option key={c.id} value={c.id}>{c.name}</option>
+                                            ))}
+                                    </select>
+                                    <button
+                                        type="button"
+                                        onClick={handleResetCategories}
+                                        className="px-3 py-2 bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 text-xs font-medium"
+                                        title="Reset to Standard Categories"
+                                    >
+                                        Reset List
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    Standard: Maxi, Kurti, Tops, Shirts, Maternity.
+                                </p>
                             </div>
 
                             {/* Footer Actions */}
@@ -384,10 +416,10 @@ const Products: React.FC = () => {
                             </div>
 
                         </form>
-                    </div>
-                </div>
+                    </div >
+                </div >
             )}
-        </div>
+        </div >
     );
 };
 

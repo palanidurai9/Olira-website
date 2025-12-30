@@ -19,9 +19,11 @@ const Footer: React.FC = () => {
             links: [
                 { name: 'New Arrivals', to: '/new-arrivals' },
                 { name: 'Best Sellers', to: '/shop?sort=best-selling' },
-                { name: 'Sarees', to: '/sarees' },
-                { name: 'Kurtis', to: '/kurtis' },
-                { name: 'Dresses', to: '/dresses' }
+                { name: 'Maxi Dresses', to: '/shop?category=maxi-dress' },
+                { name: 'Kurti Sets', to: '/shop?category=kurti-set' },
+                { name: 'Tops', to: '/shop?category=tops' },
+                { name: 'Shirts', to: '/shop?category=shirts' },
+                { name: 'Maternity Dresses', to: '/shop?category=maternity-dress' }
             ]
         },
         {

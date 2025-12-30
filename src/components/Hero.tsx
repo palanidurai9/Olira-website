@@ -56,7 +56,7 @@ const Hero: React.FC = () => {
                 >
                     <Link
                         to="/shop"
-                        className="inline-flex items-center bg-white text-dark px-8 py-3 text-xs md:text-sm uppercase tracking-widest font-medium hover:bg-primary hover:text-white transition-all duration-300 transform hover:scale-105"
+                        className="inline-flex items-center bg-white text-dark px-8 py-3 text-xs md:text-sm uppercase tracking-widest font-medium hover:bg-secondary hover:text-white transition-all duration-300 transform hover:scale-105"
                     >
                         Discover OLIRA <ArrowRight size={16} className="ml-2" />
                     </Link>

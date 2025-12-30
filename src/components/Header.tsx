@@ -43,21 +43,21 @@ const Header: React.FC = () => {
                             <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-secondary transition-all duration-300 group-hover:w-full"></span>
                         </Link>
 
-                        {/* Shop with Dropdown Hover */}
+                        {/* Shop with Dropdown Hover - Renamed to Women */}
                         <div className="relative group">
                             <Link to="/shop" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 py-4">
-                                Shop Collection
+                                Women
                             </Link>
 
                             {/* Dropdown Menu - Sleek & Minimal */}
                             <div className="absolute top-full left-0 mt-3 w-48 bg-white border border-gray-100 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 rounded-sm overflow-hidden">
                                 <div className="py-2 flex flex-col">
                                     {[
-                                        { name: 'Sarees', path: '/sarees' },
-                                        { name: 'Kurtis', path: '/kurtis' },
-                                        { name: 'Dresses', path: '/dresses' },
-                                        { name: 'Co-Ord Sets', path: '/coord-sets' },
-                                        { name: 'All Products', path: '/shop' },
+                                        { name: 'All Women', path: '/shop' },
+                                        { name: 'Maxi Dresses', path: '/shop?category=maxi-dress' },
+                                        { name: 'Kurti Sets', path: '/shop?category=kurti-set' },
+                                        { name: 'Tops', path: '/shop?category=tops' },
+                                        { name: 'Shirts', path: '/shop?category=shirts' },
                                     ].map((subItem) => (
                                         <Link
                                             key={subItem.name}
@@ -70,6 +70,12 @@ const Header: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Maternity Link - Separate as requested */}
+                        <Link to="/shop?category=maternity-dress" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
+                            Maternity
+                            <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-secondary transition-all duration-300 group-hover:w-full"></span>
+                        </Link>
 
                         <Link to="/new-arrivals" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
                             New Arrivals
@@ -147,7 +153,8 @@ const Header: React.FC = () => {
                             </div>
                             <nav className="flex flex-col p-6 space-y-4">
                                 <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Home</Link>
-                                <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Shop Collection</Link>
+                                <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Women</Link>
+                                <Link to="/shop?category=maternity-dress" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Maternity</Link>
                                 <Link to="/new-arrivals" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">New Arrivals</Link>
                                 <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Our Story</Link>
                                 <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Contact</Link>
