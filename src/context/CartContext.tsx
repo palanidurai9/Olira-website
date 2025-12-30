@@ -10,8 +10,9 @@ export interface CartItem extends Product {
 
 interface CartContextType {
     cart: CartItem[];
-    addToCart: (product: Product, size: string) => void;
+    addToCart: (product: Product, size: string, quantity?: number) => void;
     removeFromCart: (cartId: string) => void;
+    updateQuantity: (cartId: string, delta: number) => void;
     clearCart: () => void;
     isCartOpen: boolean;
     setIsCartOpen: (isOpen: boolean) => void;
@@ -31,23 +32,33 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('olira-cart', JSON.stringify(cart));
     }, [cart]);
 
-    const addToCart = (product: Product, size: string) => {
+    const addToCart = (product: Product, size: string, quantity: number = 1) => {
         setCart(prev => {
             const existing = prev.find(item => item.id === product.id && item.selectedSize === size);
             if (existing) {
                 return prev.map(item =>
                     item.cartId === existing.cartId
-                        ? { ...item, quantity: item.quantity + 1 }
+                        ? { ...item, quantity: item.quantity + quantity }
                         : item
                 );
             }
-            return [...prev, { ...product, cartId: crypto.randomUUID(), selectedSize: size, quantity: 1 }];
+            return [...prev, { ...product, cartId: crypto.randomUUID(), selectedSize: size, quantity }];
         });
         setIsCartOpen(true);
     };
 
     const removeFromCart = (cartId: string) => {
         setCart(prev => prev.filter(item => item.cartId !== cartId));
+    };
+
+    const updateQuantity = (cartId: string, delta: number) => {
+        setCart(prev => prev.map(item => {
+            if (item.cartId === cartId) {
+                const newQuantity = item.quantity + delta;
+                return newQuantity > 0 ? { ...item, quantity: newQuantity } : item;
+            }
+            return item;
+        }));
     };
 
     const clearCart = () => setCart([]);
@@ -58,7 +69,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 0);
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, clearCart, isCartOpen, setIsCartOpen, cartTotal }}>
+        <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, isCartOpen, setIsCartOpen, cartTotal }}>
             {children}
         </CartContext.Provider>
     );

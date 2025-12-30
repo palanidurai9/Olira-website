@@ -11,6 +11,7 @@ const ProductPage: React.FC = () => {
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedSize, setSelectedSize] = useState<string>('');
+    const [quantity, setQuantity] = useState<number>(1);
     const [activeImage, setActiveImage] = useState<string>('');
     const { addToCart } = useCart();
     const [error, setError] = useState<string | null>(null);
@@ -51,7 +52,7 @@ const ProductPage: React.FC = () => {
             alert('Please select a size');
             return;
         }
-        addToCart(product, selectedSize);
+        addToCart(product, selectedSize, quantity);
     };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center bg-white"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
@@ -158,6 +159,33 @@ const ProductPage: React.FC = () => {
                                         {size}
                                     </button>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Quantity */}
+                        <div className="mb-8">
+                            <div className="flex justify-between items-center mb-3">
+                                <span className="font-semibold text-sm uppercase tracking-wide">Quantity</span>
+                            </div>
+                            <div className="flex items-center">
+                                <button
+                                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                    className="w-10 h-10 border border-gray-200 rounded-l-md flex items-center justify-center hover:bg-gray-50 text-dark"
+                                >
+                                    -
+                                </button>
+                                <div className="w-12 h-10 border-t border-b border-gray-200 flex items-center justify-center font-medium text-dark">
+                                    {quantity}
+                                </div>
+                                <button
+                                    onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
+                                    className="w-10 h-10 border border-gray-200 rounded-r-md flex items-center justify-center hover:bg-gray-50 text-dark"
+                                >
+                                    +
+                                </button>
+                                <span className="ml-4 text-xs text-gray-500">
+                                    {product.stock > 0 ? `${product.stock} items available` : 'Out of Stock'}
+                                </span>
                             </div>
                         </div>
 

@@ -366,6 +366,32 @@ const Products: React.FC = () => {
                                 </div>
                             </div>
 
+                            {/* Sizes */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Available Sizes</label>
+                                <div className="flex flex-wrap gap-2">
+                                    {['XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'].map(size => (
+                                        <button
+                                            key={size}
+                                            type="button"
+                                            onClick={() => {
+                                                const currentSizes = currentProduct.sizes || [];
+                                                const newSizes = currentSizes.includes(size)
+                                                    ? currentSizes.filter(s => s !== size)
+                                                    : [...currentSizes, size];
+                                                setCurrentProduct({ ...currentProduct, sizes: newSizes });
+                                            }}
+                                            className={`px-3 py-1 rounded-md text-sm border transition-colors ${currentProduct.sizes?.includes(size)
+                                                    ? 'bg-primary text-white border-primary'
+                                                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             {/* Category */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>

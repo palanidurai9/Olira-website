@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
 
 const CartDrawer: React.FC = () => {
-    const { isCartOpen, setIsCartOpen, cart, removeFromCart, cartTotal } = useCart();
+    const { isCartOpen, setIsCartOpen, cart, removeFromCart, updateQuantity, cartTotal } = useCart();
 
     // Prevent body scroll when cart is open
     React.useEffect(() => {
@@ -93,9 +93,22 @@ const CartDrawer: React.FC = () => {
                                                 <p className="text-sm text-gray-500 mt-1">Size: {item.selectedSize}</p>
                                             </div>
                                             <div className="flex items-center justify-between mt-2">
-                                                {/* Simple Quantity Display since context lacks update quantity method currently */}
                                                 <div className="flex items-center border border-gray-200 rounded">
-                                                    <span className="px-3 py-1 text-sm text-gray-600">Qty: {item.quantity}</span>
+                                                    <button
+                                                        onClick={() => updateQuantity(item.cartId, -1)}
+                                                        disabled={item.quantity <= 1}
+                                                        className="px-2 py-1 text-gray-500 hover:bg-gray-100 disabled:opacity-50"
+                                                    >
+                                                        -
+                                                    </button>
+                                                    <span className="px-2 py-1 text-sm text-gray-600 min-w-[2rem] text-center">{item.quantity}</span>
+                                                    <button
+                                                        onClick={() => updateQuantity(item.cartId, 1)}
+                                                        disabled={item.quantity >= item.stock}
+                                                        className="px-2 py-1 text-gray-500 hover:bg-gray-100 disabled:opacity-50"
+                                                    >
+                                                        +
+                                                    </button>
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="font-medium text-dark">
