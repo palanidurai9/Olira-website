@@ -168,6 +168,39 @@ const Products: React.FC = () => {
                         </div>
 
                         <form onSubmit={handleSave} className="space-y-6">
+                            {/* Product Image */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
+                                <div className="space-y-3">
+                                    {currentProduct.images?.[0]?.image_url && (
+                                        <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
+                                            <img
+                                                src={currentProduct.images[0].image_url}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    )}
+                                    <input
+                                        type="url"
+                                        value={currentProduct.images?.[0]?.image_url || ''}
+                                        onChange={e => {
+                                            const newImages = [...(currentProduct.images || [])];
+                                            if (newImages.length > 0) {
+                                                newImages[0] = { ...newImages[0], image_url: e.target.value };
+                                            } else {
+                                                newImages.push({ id: 'temp-' + Date.now(), product_id: currentProduct.id || '', image_url: e.target.value, order_index: 0 });
+                                            }
+                                            setCurrentProduct({ ...currentProduct, images: newImages });
+                                        }}
+                                        className="w-full p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                        placeholder="Paste image URL (e.g. from Unsplash)"
+                                    />
+                                    <p className="text-xs text-gray-500">
+                                        For now, simply paste a URL. Future updates will support file uploads.
+                                    </p>
+                                </div>
+                            </div>
                             {/* Product Name */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
@@ -262,7 +295,31 @@ const Products: React.FC = () => {
                                         <option key={c.id} value={c.id}>{c.name}</option>
                                     ))}
                                 </select>
-                                <p className="text-xs text-gray-400 mt-1">Manage categories in Database for now.</p>
+                                {categories.length === 0 ? (
+                                    <div className="mt-2 text-xs text-orange-500 flex items-center gap-2">
+                                        <span>No categories found in database.</span>
+                                        <button
+                                            type="button"
+                                            onClick={async () => {
+                                                const defaults = [
+                                                    { name: 'Sarees', slug: 'sarees' },
+                                                    { name: 'Kurtis', slug: 'kurtis' },
+                                                    { name: 'Dresses', slug: 'dresses' },
+                                                    { name: 'Co-ord Sets', slug: 'coord-sets' },
+                                                    { name: 'Suit Sets', slug: 'suit-sets' }
+                                                ];
+                                                const { error } = await supabase.from('categories').insert(defaults);
+                                                if (error) alert('Failed to create categories: ' + error.message);
+                                                else fetchData();
+                                            }}
+                                            className="text-primary hover:underline font-medium"
+                                        >
+                                            Initialize Defaults
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <p className="text-xs text-gray-400 mt-1">Select a category for this product.</p>
+                                )}
                             </div>
 
                             {/* Footer Actions */}

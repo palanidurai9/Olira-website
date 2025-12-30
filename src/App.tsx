@@ -11,6 +11,7 @@ import Orders from './pages/Admin/Orders';
 import ProductPage from './pages/Product';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import Contact from './pages/Contact';
 
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import CartDrawer from './components/CartDrawer';
@@ -32,6 +33,7 @@ function App() {
           <Route path="/product/:slug" element={<ProductPage />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/contact" element={<Contact />} />
 
           {/* New Arrivals */}
           <Route path="/new-arrivals" element={<Shop pageTitle="New Arrivals" pageDescription="Be the first to wear our latest designs." />} />

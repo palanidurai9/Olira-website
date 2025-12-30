@@ -1,8 +1,16 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 
 const FloatingWhatsApp: React.FC = () => {
+    const location = useLocation();
+
+    // Hide on admin pages
+    if (location.pathname.startsWith('/admin')) {
+        return null;
+    }
+
     // Replace with actual WhatsApp number
     const whatsappNumber = "919876543210";
     const message = "Hi Olira! I'm interested in your collection.";

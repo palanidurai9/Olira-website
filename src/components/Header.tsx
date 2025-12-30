@@ -4,24 +4,17 @@ import { Link } from 'react-router-dom';
 import { ShoppingBag, Menu, X, Search, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import SearchModal from './SearchModal';
 
 const Header: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const { cart, setIsCartOpen } = useCart();
-    const [searchQuery, setSearchQuery] = useState('');
-
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        // Here you would implement actual search redirection, e.g., navigate to /shop?search=query
-        console.log('Searching for:', searchQuery);
-        setIsSearchOpen(false);
-    };
 
     return (
         <>
             {/* Announcement Bar - Luxury Minimal */}
-            <div className="bg-secondary text-primary text-[10px] md:text-[11px] text-center py-1.5 tracking-[0.2em] uppercase font-medium">
+            <div className="bg-secondary text-neutral text-[10px] md:text-[11px] text-center py-1.5 tracking-[0.2em] uppercase font-bold">
                 Free Shipping on Orders Above ₹2000 | Modesty Made Modern
             </div>
 
@@ -69,7 +62,7 @@ const Header: React.FC = () => {
                                         <Link
                                             key={subItem.name}
                                             to={subItem.path}
-                                            className="px-5 py-2.5 text-xs text-gray-500 hover:text-primary hover:bg-gray-50 transition-colors uppercase tracking-wider text-left"
+                                            className="px-5 py-2.5 text-xs text-gray-500 hover:bg-primary hover:text-white transition-colors uppercase tracking-wider text-left"
                                         >
                                             {subItem.name}
                                         </Link>
@@ -85,6 +78,11 @@ const Header: React.FC = () => {
 
                         <Link to="/about" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
                             Our Story
+                            <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-secondary transition-all duration-300 group-hover:w-full"></span>
+                        </Link>
+
+                        <Link to="/contact" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
+                            Contact
                             <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-secondary transition-all duration-300 group-hover:w-full"></span>
                         </Link>
                     </nav>
@@ -120,81 +118,53 @@ const Header: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Search Bar Overlay */}
+
+                {/* Mobile Menu Overlay */}
                 <AnimatePresence>
-                    {isSearchOpen && (
-                        <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="absolute top-full left-0 w-full bg-white shadow-lg overflow-hidden"
-                        >
-                            <div className="container-custom py-4">
-                                <form onSubmit={handleSearch} className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Search products..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        autoFocus
-                                        className="w-full bg-gray-50 border-none rounded-md px-4 py-3 pl-12 focus:ring-1 focus:ring-primary text-dark"
-                                    />
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsSearchOpen(false)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500"
-                                    >
-                                        <X size={18} />
+                    {isMenuOpen && (
+                        <>
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 0.5 }}
+                                exit={{ opacity: 0 }}
+                                className="fixed inset-0 bg-black z-50 md:hidden"
+                                onClick={() => setIsMenuOpen(false)}
+                            />
+                            <motion.div
+                                initial={{ x: '-100%' }}
+                                animate={{ x: 0 }}
+                                exit={{ x: '-100%' }}
+                                transition={{ type: 'tween', duration: 0.3 }}
+                                className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-white z-[60] shadow-2xl md:hidden flex flex-col"
+                            >
+                                <div className="p-5 flex justify-between items-center border-b border-gray-100">
+                                    <span className="text-2xl font-serif font-bold text-primary">OLIRA</span>
+                                    <button onClick={() => setIsMenuOpen(false)} className="p-2 text-gray-500 hover:text-red-500 transition-colors">
+                                        <X size={24} />
                                     </button>
-                                </form>
-                            </div>
-                        </motion.div>
+                                </div>
+                                <nav className="flex flex-col p-6 space-y-4">
+                                    <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Home</Link>
+                                    <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Shop Collection</Link>
+                                    <Link to="/new-arrivals" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">New Arrivals</Link>
+                                    <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Our Story</Link>
+                                    <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Contact</Link>
+                                </nav>
+                                <div className="mt-auto p-6 bg-gray-50">
+                                    <p className="text-sm text-gray-500 mb-2">Need help?</p>
+                                    <a href="tel:+919876543210" className="flex items-center text-primary font-medium">
+                                        <Phone size={18} className="mr-2" />
+                                        +91 98765 43210
+                                    </a>
+                                </div>
+                            </motion.div>
+                        </>
                     )}
                 </AnimatePresence>
-            </header>
 
-            {/* Mobile Menu Overlay */}
-            <AnimatePresence>
-                {isMenuOpen && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 0.5 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black z-50 md:hidden"
-                            onClick={() => setIsMenuOpen(false)}
-                        />
-                        <motion.div
-                            initial={{ x: '-100%' }}
-                            animate={{ x: 0 }}
-                            exit={{ x: '-100%' }}
-                            transition={{ type: 'tween', duration: 0.3 }}
-                            className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-white z-[60] shadow-2xl md:hidden flex flex-col"
-                        >
-                            <div className="p-5 flex justify-between items-center border-b border-gray-100">
-                                <span className="text-2xl font-serif font-bold text-primary">OLIRA</span>
-                                <button onClick={() => setIsMenuOpen(false)} className="p-2 text-gray-500 hover:text-red-500 transition-colors">
-                                    <X size={24} />
-                                </button>
-                            </div>
-                            <nav className="flex flex-col p-6 space-y-4">
-                                <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Home</Link>
-                                <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Shop Collection</Link>
-                                <Link to="/new-arrivals" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">New Arrivals</Link>
-                                <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Our Story</Link>
-                            </nav>
-                            <div className="mt-auto p-6 bg-gray-50">
-                                <p className="text-sm text-gray-500 mb-2">Need help?</p>
-                                <a href="tel:+919876543210" className="flex items-center text-primary font-medium">
-                                    <Phone size={18} className="mr-2" />
-                                    +91 98765 43210
-                                </a>
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+                <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
+            </header>
         </>
     );
 };
