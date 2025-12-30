@@ -11,18 +11,18 @@ import Orders from './pages/Admin/Orders';
 import ProductPage from './pages/Product';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
-import Contact from './pages/Contact';
+import Contact from './pages/CustomerCare/Contact';
 
 // New Pages
-import Shipping from './pages/Shipping';
-import Returns from './pages/Returns';
-import SizeGuide from './pages/SizeGuide';
-import TrackOrder from './pages/TrackOrder';
-import FAQ from './pages/FAQ';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
-import CookiesPage from './pages/Cookies';
-import ReturnPolicy from './pages/ReturnPolicy';
+import Shipping from './pages/CustomerCare/Shipping';
+import Returns from './pages/CustomerCare/Returns';
+import SizeGuide from './pages/CustomerCare/SizeGuide';
+import TrackOrder from './pages/CustomerCare/TrackOrder';
+import FAQ from './pages/CustomerCare/FAQ';
+import Terms from './pages/Legal/Terms';
+import Privacy from './pages/Legal/Privacy';
+import CookiesPage from './pages/Legal/Cookies';
+import ReturnPolicy from './pages/Legal/ReturnPolicy';
 
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import CartDrawer from './components/CartDrawer';
