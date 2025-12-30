@@ -39,7 +39,7 @@ const Header: React.FC = () => {
 
                     {/* Logo - Centered Mobile, Left Desktop */}
                     <Link to="/" className="w-28 md:w-36 opacity-100 hover:opacity-90 transition-opacity">
-                        <img src="/src/assets/olira-text-logo.png" alt="OLIRA" className="w-full h-auto object-contain brightness-0 invert" />
+                        <img src="/src/assets/olira-text-logo.png" alt="OLIRA" className="w-full h-auto object-contain " />
                     </Link>
 
                     {/* Desktop Navigation - Editorial Style */}
