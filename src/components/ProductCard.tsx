@@ -24,9 +24,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         >
             <Link to={`/product/${product.slug}`} className="block relative overflow-hidden rounded-lg bg-gray-100 aspect-[2/3]">
                 {/* Badges */}
-                <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
-                    {isNew && <span className="bg-dark text-white text-[10px] uppercase font-bold px-2 py-1 tracking-wider">New Arrival</span>}
-                    {isSale && <span className="bg-red-600 text-white text-[10px] uppercase font-bold px-2 py-1 tracking-wider">Sale</span>}
+                <div className="absolute top-2 left-2 md:top-3 md:left-3 z-10 flex flex-col gap-1.5 md:gap-2">
+                    {isNew && <span className="bg-dark text-white text-[8px] md:text-[10px] uppercase font-bold px-1.5 py-0.5 md:px-2 md:py-1 tracking-wide md:tracking-wider">New</span>}
+                    {isSale && <span className="bg-red-600 text-white text-[8px] md:text-[10px] uppercase font-bold px-1.5 py-0.5 md:px-2 md:py-1 tracking-wide md:tracking-wider">Sale</span>}
                 </div>
 
                 {/* Image */}

@@ -72,37 +72,39 @@ const ProductPage: React.FC = () => {
 
             <div className="container-custom pt-8 pb-16">
                 {/* Breadcrumbs */}
-                <div className="text-sm text-gray-400 mb-8 flex items-center">
-                    <Link to="/" className="hover:text-primary">Home</Link>
-                    <span className="mx-2">/</span>
-                    <Link to="/shop" className="hover:text-primary">Shop</Link>
-                    <span className="mx-2">/</span>
-                    <span className="text-dark font-medium">{product.name}</span>
+                <div className="text-xs tracking-widest uppercase text-gray-500 mb-8 flex items-center">
+                    <Link to="/" className="hover:text-black transition-colors">Home</Link>
+                    <span className="mx-2 text-gray-300">/</span>
+                    <Link to="/shop" className="hover:text-black transition-colors">Shop</Link>
+                    <span className="mx-2 text-gray-300">/</span>
+                    <span className="text-dark font-medium line-clamp-1">{product.name}</span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
                     {/* Image Section */}
-                    <div className="space-y-4">
-                        <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden relative group">
+                    <div className="space-y-4 lg:space-y-0 lg:flex lg:flex-row-reverse lg:gap-4 sticky top-24">
+                        {/* Main Image */}
+                        <div className="flex-1 aspect-[3/4] bg-gray-100 overflow-hidden relative group">
                             <img
                                 src={activeImage}
                                 alt={product.name}
                                 className="w-full h-full object-cover"
                             />
                             {discount > 0 && (
-                                <span className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1.5 uppercase tracking-wider">
+                                <span className="absolute top-4 left-4 bg-white text-black text-[10px] uppercase font-bold px-3 py-1 tracking-widest shadow-sm">
                                     -{discount}% OFF
                                 </span>
                             )}
                         </div>
+
                         {/* Thumbnails */}
                         {product.images && product.images.length > 1 && (
-                            <div className="flex gap-4 overflow-x-auto pb-2">
+                            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide lg:flex-col lg:w-20 lg:h-[calc(4*5rem)] lg:overflow-y-auto lg:pb-0">
                                 {product.images.map((img: any, idx: number) => (
                                     <button
                                         key={idx}
                                         onClick={() => setActiveImage(img.image_url)}
-                                        className={`w-20 aspect-[3/4] rounded-md overflow-hidden border-2 transition-all flex-shrink-0 ${activeImage === img.image_url ? 'border-primary' : 'border-transparent hover:border-gray-200'}`}
+                                        className={`w-20 aspect-[3/4] overflow-hidden border transition-all flex-shrink-0 ${activeImage === img.image_url ? 'border-black opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
                                     >
                                         <img src={img.image_url} className="w-full h-full object-cover" />
                                     </button>
@@ -112,49 +114,41 @@ const ProductPage: React.FC = () => {
                     </div>
 
                     {/* Info Section */}
-                    <div>
-                        <h1 className="text-3xl md:text-4xl font-serif font-bold text-dark mb-4">{product.name}</h1>
-
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="flex items-end gap-3">
-                                <span className="text-2xl font-bold text-dark">₹{price}</span>
-                                {originalPrice && <span className="text-lg text-gray-400 line-through decoration-1">₹{originalPrice}</span>}
-                            </div>
-                            {/* Placeholder Rating */}
-                            <div className="flex items-center text-yellow-500 text-sm">
-                                <Star size={16} fill="currentColor" />
-                                <Star size={16} fill="currentColor" />
-                                <Star size={16} fill="currentColor" />
-                                <Star size={16} fill="currentColor" />
-                                <Star size={16} fill="currentColor" />
-                                <span className="text-gray-400 ml-2">(12 reviews)</span>
-                            </div>
-                        </div>
-
-                        <div className="prose text-gray-600 mb-8 max-w-none text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description || 'No description available.' }} />
-
-                        {/* Attributes */}
-                        <div className="space-y-4 mb-8">
-                            {(product.fabric || product.care) && (
-                                <div className="bg-gray-50 p-4 rounded-lg text-sm space-y-2 border border-gray-100">
-                                    {product.fabric && <p><span className="font-semibold text-dark w-20 inline-block">Fabric:</span> {product.fabric}</p>}
-                                    {product.care && <p><span className="font-semibold text-dark w-20 inline-block">Care:</span> {product.care}</p>}
+                    <div className="flex flex-col h-full">
+                        <div className="mb-6 border-b border-gray-100 pb-6">
+                            <h1 className="text-3xl lg:text-4xl font-serif text-dark mb-2 leading-tight">{product.name}</h1>
+                            <div className="flex items-center gap-4 mt-4">
+                                <div className="flex items-baseline gap-3">
+                                    <span className="text-xl font-medium text-dark">₹{price}</span>
+                                    {originalPrice && <span className="text-base text-gray-400 line-through">₹{originalPrice}</span>}
                                 </div>
-                            )}
+                                <div className="h-4 w-px bg-gray-200"></div>
+                                <div className="flex items-center text-yellow-500 text-xs gap-1">
+                                    <div className="flex">
+                                        {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" className="text-yellow-400" />)}
+                                    </div>
+                                    <span className="text-gray-400 ml-1 underline decoration-gray-300 underline-offset-4 decoration-1 hover:text-dark cursor-pointer">12 Reviews</span>
+                                </div>
+                            </div>
                         </div>
 
-                        {/* Selector */}
+                        <div className="prose text-gray-600 mb-8 max-w-none text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description || '' }} />
+
+                        {/* Select Size */}
                         <div className="mb-8">
                             <div className="flex justify-between items-center mb-3">
-                                <span className="font-semibold text-sm uppercase tracking-wide">Select Size</span>
-                                <button className="text-xs text-primary underline">Size Guide</button>
+                                <span className="font-semibold text-xs uppercase tracking-widest text-gray-900">Size</span>
+                                <button className="text-xs text-gray-500 underline underline-offset-4 hover:text-black transition-colors">Size Guide</button>
                             </div>
                             <div className="flex flex-wrap gap-3">
                                 {product.sizes.map(size => (
                                     <button
                                         key={size}
                                         onClick={() => setSelectedSize(size)}
-                                        className={`h-12 w-12 flex items-center justify-center border font-medium transition-all rounded-md ${selectedSize === size ? 'bg-primary text-white border-primary shadow-lg scale-105' : 'bg-white text-dark border-gray-200 hover:border-dark'}`}
+                                        className={`h-10 min-w-[3rem] px-3 flex items-center justify-center border text-sm transition-all ${selectedSize === size
+                                            ? 'bg-black text-white border-black'
+                                            : 'bg-white text-dark border-gray-200 hover:border-black'
+                                            }`}
                                     >
                                         {size}
                                     </button>
@@ -164,55 +158,76 @@ const ProductPage: React.FC = () => {
 
                         {/* Quantity */}
                         <div className="mb-8">
-                            <div className="flex justify-between items-center mb-3">
-                                <span className="font-semibold text-sm uppercase tracking-wide">Quantity</span>
-                            </div>
-                            <div className="flex items-center">
-                                <button
-                                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                    className="w-10 h-10 border border-gray-200 rounded-l-md flex items-center justify-center hover:bg-gray-50 text-dark"
-                                >
-                                    -
-                                </button>
-                                <div className="w-12 h-10 border-t border-b border-gray-200 flex items-center justify-center font-medium text-dark">
-                                    {quantity}
+                            <span className="font-semibold text-xs uppercase tracking-widest text-gray-900 mb-3 block">Quantity</span>
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center border border-gray-200 h-10 w-32">
+                                    <button
+                                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                        className="flex-1 h-full flex items-center justify-center hover:bg-gray-50 transition-colors"
+                                    >
+                                        -
+                                    </button>
+                                    <div className="w-10 text-center text-sm font-medium">{quantity}</div>
+                                    <button
+                                        onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
+                                        className="flex-1 h-full flex items-center justify-center hover:bg-gray-50 transition-colors"
+                                    >
+                                        +
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
-                                    className="w-10 h-10 border border-gray-200 rounded-r-md flex items-center justify-center hover:bg-gray-50 text-dark"
-                                >
-                                    +
-                                </button>
-                                <span className="ml-4 text-xs text-gray-500">
-                                    {product.stock > 0 ? `${product.stock} items available` : 'Out of Stock'}
+                                <span className="text-xs text-gray-500">
+                                    {product.stock > 0 ? `${product.stock} pieces in stock` : 'Out of Stock'}
                                 </span>
                             </div>
                         </div>
 
                         {/* Actions */}
-                        <div className="flex gap-4 mb-8">
+                        <div className="flex gap-4 mb-10">
                             <button
                                 onClick={handleAddToCart}
-                                className="flex-1 bg-primary text-white py-4 rounded-lg font-medium hover:bg-secondary transition-all active:scale-[98%] shadow-lg shadow-primary/20 uppercase tracking-widest text-sm"
+                                disabled={product.stock === 0}
+                                className="flex-1 bg-black text-white py-4 font-medium hover:bg-gray-800 transition-all uppercase tracking-widest text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Add to Cart
+                                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                             </button>
-                            {/* Wishlist Button Placeholder */}
-                            <button className="w-14 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                                <Star size={20} />
+                            <button className="w-12 flex items-center justify-center border border-gray-200 hover:border-black transition-colors text-gray-400 hover:text-black">
+                                <Star size={18} />
                             </button>
                         </div>
 
-                        {/* Trust Badges */}
-                        <div className="grid grid-cols-2 gap-4 text-xs text-gray-500 pt-8 border-t border-gray-100">
-                            <div className="flex items-center gap-3">
-                                <Truck size={20} className="text-dark" />
-                                <span>Free Shipping above ₹1999</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <ShieldCheck size={20} className="text-dark" />
-                                <span>Secure Checkout</span>
-                            </div>
+                        {/* Details Accordion (Static for now, can be dynamic) */}
+                        <div className="divide-y divide-gray-100 border-t border-gray-100">
+                            <details className="group py-4 cursor-pointer">
+                                <summary className="flex items-center justify-between font-medium text-sm text-dark list-none">
+                                    Product Details
+                                    <span className="transition group-open:rotate-180">
+                                        <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                    </span>
+                                </summary>
+                                <div className="text-gray-500 text-sm mt-3 leading-relaxed space-y-2">
+                                    {product.fabric && <p><span className="text-dark font-medium">Fabric:</span> {product.fabric}</p>}
+                                    {product.care && <p><span className="text-dark font-medium">Care:</span> {product.care}</p>}
+                                    <p>SKU: {product.id.slice(0, 8).toUpperCase()}</p>
+                                </div>
+                            </details>
+                            <details className="group py-4 cursor-pointer">
+                                <summary className="flex items-center justify-between font-medium text-sm text-dark list-none">
+                                    Shipping & Returns
+                                    <span className="transition group-open:rotate-180">
+                                        <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                    </span>
+                                </summary>
+                                <div className="text-gray-500 text-sm mt-3 leading-relaxed">
+                                    <div className="flex items-start gap-3 mb-2">
+                                        <Truck size={18} className="mt-0.5" />
+                                        <span>Free standard shipping on orders over ₹1999. Estimated delivery 3-5 business days.</span>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <ShieldCheck size={18} className="mt-0.5" />
+                                        <span>Easy resets within 7 days of delivery.</span>
+                                    </div>
+                                </div>
+                            </details>
                         </div>
                     </div>
                 </div>
