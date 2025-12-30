@@ -109,7 +109,7 @@ const Home: React.FC = () => {
                                 {categories.map(category => (
                                     <Link
                                         key={category.id}
-                                        to={`/shop`} // Ideally link to filtered view
+                                        to={`/shop?category=${category.id}`}
                                         className="group relative overflow-hidden rounded-xl bg-white shadow-sm hover:shadow-md transition-all w-40 h-40 md:w-56 md:h-64 flex flex-col items-center justify-center text-center p-4 border border-gray-100"
                                     >
                                         <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500">

@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Product, Category } from '../types';
 import ProductCard from '../components/ProductCard';
@@ -12,18 +13,27 @@ interface ShopProps {
 }
 
 const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription }) => {
+    const [searchParams] = useSearchParams();
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
-    const [selectedCategory, setSelectedCategory] = useState<string>(forcedCategory || 'all');
+
+    // Initialize from Prop OR URL Query Param OR 'all'
+    const initialCategory = forcedCategory || searchParams.get('category') || 'all';
+    const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
+
     const [sortBy, setSortBy] = useState<string>('newest');
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
     useEffect(() => {
+        // Sync with Prop or URL if they change externally (though mainly mount is important)
+        const paramCategory = searchParams.get('category');
         if (forcedCategory) {
             setSelectedCategory(forcedCategory);
+        } else if (paramCategory) {
+            setSelectedCategory(paramCategory);
         }
-    }, [forcedCategory]);
+    }, [forcedCategory, searchParams]);
 
     useEffect(() => {
         fetchData();

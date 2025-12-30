@@ -50,6 +50,23 @@ const Checkout: React.FC = () => {
 
             if (error) throw error;
 
+            // Reduce Stock for each item
+            for (const item of cart) {
+                const { data: productData } = await supabase
+                    .from('products')
+                    .select('stock')
+                    .eq('id', item.id)
+                    .single();
+
+                if (productData) {
+                    const newStock = Math.max(0, productData.stock - item.quantity);
+                    await supabase
+                        .from('products')
+                        .update({ stock: newStock })
+                        .eq('id', item.id);
+                }
+            }
+
             // Success
             setSuccess(true);
             setTimeout(() => {
