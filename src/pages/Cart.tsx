@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import { Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 
 const Cart: React.FC = () => {
-    const { cart, removeFromCart, cartTotal } = useCart();
+    const { cart, removeFromCart, cartTotal, clearCart } = useCart();
     const navigate = useNavigate();
 
     // Better Context Logic needed for Decrement:
@@ -15,7 +15,17 @@ const Cart: React.FC = () => {
         <div className="min-h-screen bg-gray-50 flex flex-col">
 
             <div className="container-custom py-12 flex-grow">
-                <h1 className="text-3xl font-serif font-bold text-dark mb-8">Your Cart</h1>
+                <div className="flex items-center justify-between mb-8">
+                    <h1 className="text-3xl font-serif font-bold text-dark">Your Cart</h1>
+                    {cart.length > 0 && (
+                        <button
+                            onClick={clearCart}
+                            className="text-sm text-red-500 hover:text-red-600 font-medium underline"
+                        >
+                            Clear Cart
+                        </button>
+                    )}
+                </div>
 
                 {cart.length === 0 ? (
                     <div className="text-center py-20 bg-white rounded-lg border border-gray-100 shadow-sm">
@@ -35,7 +45,7 @@ const Cart: React.FC = () => {
                                     <div className="w-20 h-24 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                                         {/* Show first image or placeholder */}
                                         <img
-                                            src={item.images?.[0]?.image_url || 'https://via.placeholder.com/150'}
+                                            src={item.images?.[0]?.image_url || '/src/assets/product-placeholder.png'}
                                             alt={item.name}
                                             className="w-full h-full object-cover"
                                         />

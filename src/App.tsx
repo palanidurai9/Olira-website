@@ -11,6 +11,7 @@ import Orders from './pages/Admin/Orders';
 import ProductPage from './pages/Product';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import About from './pages/About';
 import Contact from './pages/CustomerCare/Contact';
 
 // New Pages
@@ -32,9 +33,9 @@ import ScrollToTop from './components/ScrollToTop';
 function App() {
   return (
     <CartProvider>
-      <CartDrawer />
       <Router>
         <ScrollToTop />
+        <CartDrawer />
         <FloatingWhatsApp />
         <Routes>
           {/* Public Routes with Header & Footer */}
@@ -49,6 +50,7 @@ function App() {
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/about" element={<About />} />
 
             {/* New Customer Care Pages */}
             <Route path="/shipping" element={<Shipping />} />

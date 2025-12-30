@@ -58,12 +58,32 @@ const Products: React.FC = () => {
             const slug = currentProduct.slug || currentProduct.name?.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
 
             const payload = { ...currentProduct, slug };
-            // Remove images array from payload as it's handled separately (mock logic for now)
+            // Remove images array from payload as it's handled separately
             delete (payload as any).images;
 
-            const { error } = await supabase.from('products').upsert(payload);
+            // 1. Save Product
+            const { data: savedProduct, error } = await supabase
+                .from('products')
+                .upsert(payload)
+                .select()
+                .single();
 
             if (error) throw error;
+
+            // 2. Save Images
+            if (currentProduct.images && currentProduct.images.length > 0) {
+                const productImages = currentProduct.images.map((img, index) => ({
+                    product_id: savedProduct.id,
+                    image_url: img.image_url,
+                    order_index: index
+                }));
+
+                // Full sync: Delete existing and re-insert (Simple way to handle reordering/deletions)
+                await supabase.from('product_images').delete().eq('product_id', savedProduct.id);
+
+                const { error: imgError } = await supabase.from('product_images').insert(productImages);
+                if (imgError) throw imgError;
+            }
 
             await fetchData();
             setIsSidebarOpen(false);
@@ -168,37 +188,59 @@ const Products: React.FC = () => {
                         </div>
 
                         <form onSubmit={handleSave} className="space-y-6">
-                            {/* Product Image */}
+                            {/* Product Images - Multiple */}
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Product Image</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Product Images</label>
                                 <div className="space-y-3">
-                                    {currentProduct.images?.[0]?.image_url && (
-                                        <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200">
-                                            <img
-                                                src={currentProduct.images[0].image_url}
-                                                alt="Preview"
-                                                className="w-full h-full object-cover"
-                                            />
+                                    {currentProduct.images?.map((img, index) => (
+                                        <div key={index} className="flex gap-2 items-start">
+                                            <div className="flex-1 space-y-2">
+                                                {img.image_url && (
+                                                    <div className="relative aspect-video w-full rounded-lg overflow-hidden bg-gray-100 border border-gray-200 h-24">
+                                                        <img src={img.image_url} alt={`Preview ${index}`} className="w-full h-full object-cover" />
+                                                    </div>
+                                                )}
+                                                <input
+                                                    type="url"
+                                                    value={img.image_url}
+                                                    onChange={e => {
+                                                        const newImages = [...(currentProduct.images || [])];
+                                                        newImages[index] = { ...newImages[index], image_url: e.target.value };
+                                                        setCurrentProduct({ ...currentProduct, images: newImages });
+                                                    }}
+                                                    className="w-full p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                                    placeholder="Paste image URL..."
+                                                />
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const newImages = currentProduct.images?.filter((_, i) => i !== index);
+                                                    setCurrentProduct({ ...currentProduct, images: newImages });
+                                                }}
+                                                className="p-2 text-red-500 hover:bg-red-50 rounded mt-auto mb-1"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
                                         </div>
-                                    )}
-                                    <input
-                                        type="url"
-                                        value={currentProduct.images?.[0]?.image_url || ''}
-                                        onChange={e => {
+                                    ))}
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
                                             const newImages = [...(currentProduct.images || [])];
-                                            if (newImages.length > 0) {
-                                                newImages[0] = { ...newImages[0], image_url: e.target.value };
-                                            } else {
-                                                newImages.push({ id: 'temp-' + Date.now(), product_id: currentProduct.id || '', image_url: e.target.value, order_index: 0 });
-                                            }
+                                            newImages.push({
+                                                id: `temp-${Date.now()}`,
+                                                product_id: currentProduct.id || '',
+                                                image_url: '',
+                                                order_index: newImages.length
+                                            });
                                             setCurrentProduct({ ...currentProduct, images: newImages });
                                         }}
-                                        className="w-full p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                                        placeholder="Paste image URL (e.g. from Unsplash)"
-                                    />
-                                    <p className="text-xs text-gray-500">
-                                        For now, simply paste a URL. Future updates will support file uploads.
-                                    </p>
+                                        className="text-sm text-primary hover:text-secondary font-medium flex items-center gap-1"
+                                    >
+                                        <Plus size={16} /> Add Another Image
+                                    </button>
                                 </div>
                             </div>
                             {/* Product Name */}
