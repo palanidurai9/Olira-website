@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
 
 const Checkout: React.FC = () => {
@@ -95,7 +93,6 @@ const Checkout: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header />
 
             <div className="container-custom py-8">
                 <button onClick={() => navigate('/cart')} className="flex items-center text-gray-500 hover:text-dark mb-8 text-sm">
@@ -216,7 +213,6 @@ const Checkout: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <Footer />
         </div>
     );
 };

@@ -32,7 +32,7 @@ const Header: React.FC = () => {
 
                     {/* Logo - Centered Mobile, Left Desktop */}
                     <Link to="/" className="w-28 md:w-36 opacity-100 hover:opacity-90 transition-opacity">
-                        <img src="/src/assets/olira-text-logo.png" alt="OLIRA" className="w-full h-auto object-contain " />
+                        <img src="/src/assets/olira-text-logo.png" alt="Oliraa" className="w-full h-auto object-contain " />
                     </Link>
 
                     {/* Desktop Navigation - Editorial Style */}
@@ -119,52 +119,52 @@ const Header: React.FC = () => {
                 </div>
 
 
-                {/* Mobile Menu Overlay */}
-                <AnimatePresence>
-                    {isMenuOpen && (
-                        <>
-                            <motion.div
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 0.5 }}
-                                exit={{ opacity: 0 }}
-                                className="fixed inset-0 bg-black z-50 md:hidden"
-                                onClick={() => setIsMenuOpen(false)}
-                            />
-                            <motion.div
-                                initial={{ x: '-100%' }}
-                                animate={{ x: 0 }}
-                                exit={{ x: '-100%' }}
-                                transition={{ type: 'tween', duration: 0.3 }}
-                                className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-white z-[60] shadow-2xl md:hidden flex flex-col"
-                            >
-                                <div className="p-5 flex justify-between items-center border-b border-gray-100">
-                                    <span className="text-2xl font-serif font-bold text-primary">OLIRA</span>
-                                    <button onClick={() => setIsMenuOpen(false)} className="p-2 text-gray-500 hover:text-red-500 transition-colors">
-                                        <X size={24} />
-                                    </button>
-                                </div>
-                                <nav className="flex flex-col p-6 space-y-4">
-                                    <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Home</Link>
-                                    <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Shop Collection</Link>
-                                    <Link to="/new-arrivals" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">New Arrivals</Link>
-                                    <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Our Story</Link>
-                                    <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Contact</Link>
-                                </nav>
-                                <div className="mt-auto p-6 bg-gray-50">
-                                    <p className="text-sm text-gray-500 mb-2">Need help?</p>
-                                    <a href="tel:+919876543210" className="flex items-center text-primary font-medium">
-                                        <Phone size={18} className="mr-2" />
-                                        +91 98765 43210
-                                    </a>
-                                </div>
-                            </motion.div>
-                        </>
-                    )}
-                </AnimatePresence>
-
-                <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-
             </header>
+
+            {/* Mobile Menu Overlay - Moved outside header to avoid stacking context issues */}
+            <AnimatePresence>
+                {isMenuOpen && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 0.5 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black z-[60] md:hidden"
+                            onClick={() => setIsMenuOpen(false)}
+                        />
+                        <motion.div
+                            initial={{ x: '-100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '-100%' }}
+                            transition={{ type: 'tween', duration: 0.3 }}
+                            className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-white z-[70] shadow-2xl md:hidden flex flex-col"
+                        >
+                            <div className="p-5 flex justify-between items-center bg-primary">
+                                <img src="/src/assets/olira-text-logo.png" alt="Oliraa" className="h-6 w-auto object-contain" />
+                                <button onClick={() => setIsMenuOpen(false)} className="p-2 text-white/80 hover:text-white transition-colors">
+                                    <X size={24} />
+                                </button>
+                            </div>
+                            <nav className="flex flex-col p-6 space-y-4">
+                                <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Home</Link>
+                                <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Shop Collection</Link>
+                                <Link to="/new-arrivals" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">New Arrivals</Link>
+                                <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Our Story</Link>
+                                <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="text-lg font-medium text-dark border-b border-gray-50 pb-2">Contact</Link>
+                            </nav>
+                            <div className="mt-auto p-6 bg-gray-50">
+                                <p className="text-sm text-gray-500 mb-2">Need help?</p>
+                                <a href="tel:+919876543210" className="flex items-center text-primary font-medium">
+                                    <Phone size={18} className="mr-2" />
+                                    +91 98765 43210
+                                </a>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
+
+            <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
         </>
     );
 };

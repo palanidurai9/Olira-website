@@ -4,8 +4,6 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Product } from '../types';
 import { useCart } from '../context/CartContext';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { Star, Truck, ShieldCheck } from 'lucide-react';
 
 const ProductPage: React.FC = () => {
@@ -70,7 +68,6 @@ const ProductPage: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-white pb-20">
-            <Header />
 
             <div className="container-custom pt-8 pb-16">
                 {/* Breadcrumbs */}
@@ -192,7 +189,6 @@ const ProductPage: React.FC = () => {
                     </div>
                 </div>
             </div>
-            <Footer />
         </div>
     );
 };

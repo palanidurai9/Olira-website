@@ -2,8 +2,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 
 const Cart: React.FC = () => {
@@ -15,7 +13,6 @@ const Cart: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
-            <Header />
 
             <div className="container-custom py-12 flex-grow">
                 <h1 className="text-3xl font-serif font-bold text-dark mb-8">Your Cart</h1>
@@ -111,7 +108,6 @@ const Cart: React.FC = () => {
                     </div>
                 )}
             </div>
-            <Footer />
         </div>
     );
 };

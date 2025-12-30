@@ -28,6 +28,7 @@ const Footer: React.FC = () => {
             title: 'Customer Care',
             icon: <HelpCircle size={18} />,
             links: [
+                { name: 'Contact Us', to: '/contact' },
                 { name: 'Shipping & Delivery', to: '/shipping' },
                 { name: 'Returns & Exchanges', to: '/returns' },
                 { name: 'Size Guide', to: '/size-guide' },
@@ -46,7 +47,7 @@ const Footer: React.FC = () => {
             ]
         },
         {
-            title: 'Contact Us',
+            title: 'Connect',
             icon: <Mail size={18} />,
             content: (
                 <div className="flex flex-col space-y-3 text-gray-500 text-sm">
@@ -71,11 +72,11 @@ const Footer: React.FC = () => {
 
     return (
         <footer className="bg-[#fcfbf9] pt-16 pb-8 border-t border-gray-100">
-            <div className="container-custom px-4 max-w-4xl mx-auto">
+            <div className="container-custom px-4 max-w-7xl mx-auto">
 
                 {/* Brand Logo - Centered */}
                 <div className="flex justify-center mb-16">
-                    <img src="/src/assets/olira-text-logo.png" alt="OLIRA" className="w-48 opacity-90" />
+                    <img src="/src/assets/olira-text-logo.png" alt="Oliraa" className="w-80 opacity-90" />
                 </div>
 
                 {/* Desktop Grid Layout (Visible on md+) */}
@@ -156,7 +157,7 @@ const Footer: React.FC = () => {
 
                 {/* Bottom Bar */}
                 <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-400">
-                    <p>&copy; {new Date().getFullYear()} OLIRA. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} Oliraa. All rights reserved.</p>
                     <div className="flex items-center space-x-6">
                         <Link to="/terms" className="hover:text-dark transition-colors">Terms of Service</Link>
                         <Link to="/privacy" className="hover:text-dark transition-colors">Privacy Policy</Link>

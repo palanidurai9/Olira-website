@@ -3,8 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Product, Category } from '../types';
 import ProductCard from '../components/ProductCard';
-import Header from '../components/Header';
-import Footer from '../components/Footer';
 import { Filter, ShoppingBag } from 'lucide-react';
 
 interface ShopProps {
@@ -60,8 +58,6 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
 
     return (
         <div className="min-h-screen bg-white">
-            <Header />
-
 
             {/* Header Banner */}
             <div className="bg-neutral py-12 md:py-20 text-center px-4">
@@ -181,7 +177,6 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
                     </div>
                 )}
             </div>
-            <Footer />
         </div>
     );
 };
