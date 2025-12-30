@@ -22,7 +22,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             viewport={{ once: true }}
             className="group"
         >
-            <Link to={`/product/${product.slug}`} className="block relative overflow-hidden rounded-lg bg-gray-100 aspect-[3/4]">
+            <Link to={`/product/${product.slug}`} className="block relative overflow-hidden rounded-lg bg-gray-100 aspect-[2/3]">
                 {/* Badges */}
                 <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
                     {isNew && <span className="bg-dark text-white text-[10px] uppercase font-bold px-2 py-1 tracking-wider">New Arrival</span>}
@@ -33,7 +33,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 <img
                     src={mainImage}
                     alt={product.name}
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
 
                 {/* Quick Add Overlay (Desktop) */}
@@ -45,8 +45,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </Link>
 
             <div className="mt-4 text-center">
-                <Link to={`/product/${product.slug}`}>
-                    <h3 className="text-dark font-medium text-lg hover:text-primary transition-colors font-serif">{product.name}</h3>
+                <Link to={`/product/${product.slug}`} title={product.name}>
+                    <h3 className="text-dark font-medium text-base hover:text-primary transition-colors font-serif line-clamp-1 px-1">{product.name}</h3>
                 </Link>
 
                 <div className="flex items-center justify-center gap-2 mt-1 text-sm">

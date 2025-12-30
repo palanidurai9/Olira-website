@@ -33,7 +33,7 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
         setLoading(true);
         const { data: catData } = await supabase.from('categories').select('*');
 
-        let query = supabase.from('products').select('*');
+        let query = supabase.from('products').select('*, product_images(*)');
 
         // Only show launched products
         const today = new Date().toISOString().split('T')[0];
@@ -42,7 +42,13 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
         const { data: prodData } = await query;
 
         if (catData) setCategories(catData);
-        if (prodData) setProducts(prodData);
+        if (prodData) {
+            const mappedProducts = prodData.map((p: any) => ({
+                ...p,
+                images: p.product_images
+            }));
+            setProducts(mappedProducts);
+        }
         setLoading(false);
     };
 
