@@ -68,23 +68,23 @@ const ProductPage: React.FC = () => {
     const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
 
     return (
-        <div className="min-h-screen bg-white pb-20">
+        <div className="min-h-screen bg-white pb-20 overflow-x-hidden">
 
             <div className="container-custom pt-8 pb-16">
                 {/* Breadcrumbs */}
-                <div className="text-xs tracking-widest uppercase text-gray-500 mb-8 flex items-center">
-                    <Link to="/" className="hover:text-black transition-colors">Home</Link>
+                <div className="text-xs tracking-widest uppercase text-gray-500 mb-8 flex flex-wrap items-center gap-y-2">
+                    <Link to="/" className="hover:text-black transition-colors whitespace-nowrap">Home</Link>
                     <span className="mx-2 text-gray-300">/</span>
-                    <Link to="/shop" className="hover:text-black transition-colors">Shop</Link>
+                    <Link to="/shop" className="hover:text-black transition-colors whitespace-nowrap">Shop</Link>
                     <span className="mx-2 text-gray-300">/</span>
-                    <span className="text-dark font-medium line-clamp-1">{product.name}</span>
+                    <span className="text-dark font-medium truncate max-w-[200px] sm:max-w-xs">{product.name}</span>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
                     {/* Image Section */}
-                    <div className="space-y-4 lg:space-y-0 lg:flex lg:flex-row-reverse lg:gap-4 sticky top-24">
+                    <div className="space-y-4 lg:space-y-0 lg:flex lg:flex-row-reverse lg:gap-4 lg:sticky lg:top-28 w-full">
                         {/* Main Image */}
-                        <div className="flex-1 aspect-[3/4] bg-gray-100 overflow-hidden relative group">
+                        <div className="w-full lg:flex-1 aspect-[3/4] bg-gray-100 overflow-hidden relative group">
                             <img
                                 src={activeImage}
                                 alt={product.name}
@@ -99,12 +99,12 @@ const ProductPage: React.FC = () => {
 
                         {/* Thumbnails */}
                         {product.images && product.images.length > 1 && (
-                            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide lg:flex-col lg:w-20 lg:h-[calc(4*5rem)] lg:overflow-y-auto lg:pb-0">
+                            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide lg:flex-col lg:w-20 lg:h-[30rem] lg:overflow-y-auto lg:pb-0 w-full h-auto">
                                 {product.images.map((img: any, idx: number) => (
                                     <button
                                         key={idx}
                                         onClick={() => setActiveImage(img.image_url)}
-                                        className={`w-20 aspect-[3/4] overflow-hidden border transition-all flex-shrink-0 ${activeImage === img.image_url ? 'border-black opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                                        className={`w-20 lg:w-full aspect-[3/4] overflow-hidden border transition-all flex-shrink-0 ${activeImage === img.image_url ? 'border-black opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
                                     >
                                         <img src={img.image_url} className="w-full h-full object-cover" />
                                     </button>
@@ -114,9 +114,9 @@ const ProductPage: React.FC = () => {
                     </div>
 
                     {/* Info Section */}
-                    <div className="flex flex-col h-full">
+                    <div className="flex flex-col h-full w-full">
                         <div className="mb-6 border-b border-gray-100 pb-6">
-                            <h1 className="text-3xl lg:text-4xl font-serif text-dark mb-2 leading-tight">{product.name}</h1>
+                            <h1 className="text-2xl lg:text-4xl font-serif text-dark mb-2 leading-tight break-words">{product.name}</h1>
                             <div className="flex items-center gap-4 mt-4">
                                 <div className="flex items-baseline gap-3">
                                     <span className="text-xl font-medium text-dark">₹{price}</span>
@@ -182,7 +182,7 @@ const ProductPage: React.FC = () => {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex gap-4 mb-10">
+                        <div className="flex gap-4 mb-10 w-full">
                             <button
                                 onClick={handleAddToCart}
                                 disabled={product.stock === 0}
@@ -190,13 +190,13 @@ const ProductPage: React.FC = () => {
                             >
                                 {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                             </button>
-                            <button className="w-12 flex items-center justify-center border border-gray-200 hover:border-black transition-colors text-gray-400 hover:text-black">
+                            <button className="w-12 flex items-center justify-center border border-gray-200 hover:border-black transition-colors text-gray-400 hover:text-black flex-shrink-0">
                                 <Star size={18} />
                             </button>
                         </div>
 
                         {/* Details Accordion (Static for now, can be dynamic) */}
-                        <div className="divide-y divide-gray-100 border-t border-gray-100">
+                        <div className="divide-y divide-gray-100 border-t border-gray-100 w-full">
                             <details className="group py-4 cursor-pointer">
                                 <summary className="flex items-center justify-between font-medium text-sm text-dark list-none">
                                     Product Details
