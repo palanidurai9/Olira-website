@@ -38,14 +38,14 @@ const Header: React.FC = () => {
                     {/* Desktop Navigation - Editorial Style */}
                     <nav className="hidden md:flex items-center space-x-10">
                         {/* Standard Links */}
-                        <Link to="/" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
+                        <Link to="/" className="text-white/90 hover:text-white font-bold text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
                             Home
                             <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-secondary transition-all duration-300 group-hover:w-full"></span>
                         </Link>
 
                         {/* Shop with Dropdown Hover - Renamed to Women */}
                         <div className="relative group">
-                            <Link to="/shop" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 py-4">
+                            <Link to="/shop" className="text-white/90 hover:text-white font-bold text-[11px] uppercase tracking-[0.15em] transition-all duration-300 py-4">
                                 Women
                             </Link>
 
@@ -72,22 +72,22 @@ const Header: React.FC = () => {
                         </div>
 
                         {/* Maternity Link - Separate as requested */}
-                        <Link to="/shop?category=maternity-dress" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
+                        <Link to="/shop?category=maternity-dress" className="text-white/90 hover:text-white font-bold text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
                             Maternity
                             <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-secondary transition-all duration-300 group-hover:w-full"></span>
                         </Link>
 
-                        <Link to="/new-arrivals" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
+                        <Link to="/new-arrivals" className="text-white/90 hover:text-white font-bold text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
                             New Arrivals
                             <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-secondary transition-all duration-300 group-hover:w-full"></span>
                         </Link>
 
-                        <Link to="/about" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
+                        <Link to="/about" className="text-white/90 hover:text-white font-bold text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
                             Our Story
                             <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-secondary transition-all duration-300 group-hover:w-full"></span>
                         </Link>
 
-                        <Link to="/contact" className="text-white/90 hover:text-white font-medium text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
+                        <Link to="/contact" className="text-white/90 hover:text-white font-bold text-[11px] uppercase tracking-[0.15em] transition-all duration-300 relative group">
                             Contact
                             <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-secondary transition-all duration-300 group-hover:w-full"></span>
                         </Link>
