@@ -132,7 +132,7 @@ const ProductPage: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="prose text-gray-600 mb-8 max-w-none text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description || '' }} />
+
 
                         {/* Select Size */}
                         <div className="mb-8">
@@ -205,9 +205,9 @@ const ProductPage: React.FC = () => {
                                     </span>
                                 </summary>
                                 <div className="text-gray-500 text-sm mt-3 leading-relaxed space-y-2">
+                                    <div className="prose text-gray-500 mb-4 max-w-none text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description || '' }} />
                                     {product.fabric && <p><span className="text-dark font-medium">Fabric:</span> {product.fabric}</p>}
                                     {product.care && <p><span className="text-dark font-medium">Care:</span> {product.care}</p>}
-                                    <p>SKU: {product.id.slice(0, 8).toUpperCase()}</p>
                                 </div>
                             </details>
                             <details className="group py-4 cursor-pointer">
