@@ -161,8 +161,8 @@ const Footer: React.FC = () => {
                 <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-gray-400">
                     <p>&copy; {new Date().getFullYear()} Oliraa. All rights reserved.</p>
                     <div className="flex items-center space-x-6">
-                        <Link to="/terms" className="hover:text-dark transition-colors">Terms of Service</Link>
-                        <Link to="/privacy" className="hover:text-dark transition-colors">Privacy Policy</Link>
+                        <Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
+                        <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
                     </div>
                 </div>
 
