@@ -8,7 +8,7 @@ import heroImg from '../assets/hero-kurti.png';
 
 const Hero: React.FC = () => {
     return (
-        <div className="relative h-[85vh] w-full overflow-hidden bg-gray-100 flex items-center justify-center">
+        <div className="relative h-[70vh] w-full overflow-hidden bg-gray-100 flex items-center justify-center">
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
                 <img
