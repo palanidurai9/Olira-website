@@ -34,7 +34,7 @@ const AdminLayout: React.FC = () => {
     };
 
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-neutral">
+        <div className="min-h-screen flex items-center justify-center bg-white">
             <div className="animate-pulse flex flex-col items-center">
                 <div className="h-12 w-12 bg-gray-200 rounded-full mb-4"></div>
                 <div className="h-4 w-32 bg-gray-200 rounded"></div>
@@ -43,7 +43,7 @@ const AdminLayout: React.FC = () => {
     );
 
     return (
-        <div className="min-h-screen bg-neutral flex font-sans">
+        <div className="min-h-screen bg-white flex font-sans">
             {/* Sidebar */}
             <aside className="w-64 bg-white border-r border-gray-200 fixed h-full z-10 hidden md:flex flex-col">
                 <div className="p-6 border-b border-gray-100 flex items-center justify-center">

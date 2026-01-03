@@ -32,7 +32,7 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-neutral flex items-center justify-center p-4">
+        <div className="min-h-screen bg-white flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 border border-gray-100">
                 <div className="flex justify-center mb-6">
                     <div className="bg-primary/10 p-4 rounded-full">

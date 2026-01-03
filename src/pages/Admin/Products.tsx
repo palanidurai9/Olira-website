@@ -298,17 +298,7 @@ const Products: React.FC = () => {
                                 />
                             </div>
 
-                            {/* Fabric */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Fabric Details</label>
-                                <input
-                                    type="text"
-                                    value={currentProduct.fabric || ''}
-                                    onChange={e => setCurrentProduct({ ...currentProduct, fabric: e.target.value })}
-                                    className="w-full p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                                    placeholder="e.g. 100% Premium Nida"
-                                />
-                            </div>
+
 
                             {/* Description */}
                             <div className="mb-4">
@@ -382,8 +372,8 @@ const Products: React.FC = () => {
                                                 setCurrentProduct({ ...currentProduct, sizes: newSizes });
                                             }}
                                             className={`px-3 py-1 rounded-md text-sm border transition-colors ${currentProduct.sizes?.includes(size)
-                                                    ? 'bg-primary text-white border-primary'
-                                                    : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                                                ? 'bg-primary text-white border-primary'
+                                                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
                                                 }`}
                                         >
                                             {size}
