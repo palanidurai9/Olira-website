@@ -57,13 +57,13 @@ const Footer: React.FC = () => {
                     <p>Phone: +91 98765 43210</p>
                     <p>Mon - Fri: 10:00 AM - 6:00 PM</p>
                     <div className="flex items-center space-x-4 mt-2">
-                        <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-primary hover:text-white transition-colors">
+                        <a href="#" className="p-2 bg-primary-100 rounded-full hover:bg-primary hover:text-white transition-colors">
                             <Instagram size={18} />
                         </a>
-                        <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-primary hover:text-white transition-colors">
+                        <a href="#" className="p-2 bg-primary-100 rounded-full hover:bg-primary hover:text-white transition-colors">
                             <Facebook size={18} />
                         </a>
-                        <a href="#" className="p-2 bg-gray-100 rounded-full hover:bg-primary hover:text-white transition-colors">
+                        <a href="#" className="p-2 bg-primary-100 rounded-full hover:bg-primary hover:text-white transition-colors">
                             <Twitter size={18} />
                         </a>
                     </div>

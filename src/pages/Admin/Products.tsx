@@ -181,6 +181,7 @@ const Products: React.FC = () => {
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-100 text-xs font-semibold uppercase tracking-wider text-gray-500">
                                 <th className="p-4">Name</th>
+                                <th className="p-4">Category</th>
                                 <th className="p-4">Price</th>
                                 <th className="p-4">Launch Date</th>
                                 <th className="p-4">Stock</th>
@@ -189,15 +190,20 @@ const Products: React.FC = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-50">
                             {loading ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-gray-400">Loading products...</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-gray-400">Loading products...</td></tr>
                             ) : products.length === 0 ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-gray-400">No products found. Add your first one!</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-gray-400">No products found. Add your first one!</td></tr>
                             ) : (
                                 products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())).map(product => (
                                     <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                                         <td className="p-4">
                                             <div className="font-medium text-dark">{product.name}</div>
                                             <div className="text-xs text-gray-400">{product.slug}</div>
+                                        </td>
+                                        <td className="p-4">
+                                            <span className="inline-block px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+                                                {categories.find(c => c.id === product.category_id)?.name || 'Uncategorized'}
+                                            </span>
                                         </td>
                                         <td className="p-4">₹{product.price}</td>
                                         <td className="p-4 w-32">
