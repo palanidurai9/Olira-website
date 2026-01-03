@@ -10,7 +10,7 @@ export default {
                 primary: "#737c60", // OLIRAA Green
                 secondary: "#f4c0be", // OLIRAA Pink
                 accent: "#f9f1ee", // Very light background
-                neutral: "#F1E0C7", // Cream background (Increased color)
+                neutral: "#fff3e1", // Cream background
                 dark: "#2D3028", // Darker Green/Gray for text
             },
             fontFamily: {
