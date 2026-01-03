@@ -9,8 +9,13 @@
     font-family: 'Inter', sans-serif;
     scroll-behavior: smooth;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Playfair Display', serif;
   }
 
@@ -23,11 +28,11 @@
   .btn-primary {
     @apply bg-primary text-white px-6 py-3 rounded-md hover:bg-secondary transition-all duration-300 font-medium tracking-wide shadow-md hover:shadow-lg active:scale-95;
   }
-  
+
   .btn-outline {
     @apply border border-primary text-primary px-6 py-3 rounded-md hover:bg-primary hover:text-white transition-all duration-300 font-medium tracking-wide active:scale-95;
   }
-  
+
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
