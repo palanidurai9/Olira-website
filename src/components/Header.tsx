@@ -14,7 +14,7 @@ const Header: React.FC = () => {
     return (
         <>
             {/* Announcement Bar - Luxury Minimal */}
-            <div className="bg-secondary text-neutral text-[10px] md:text-[11px] text-center py-1.5 tracking-[0.2em] uppercase font-bold">
+            <div className="bg-secondary text-accent text-[10px] md:text-[11px] text-center py-1.5 tracking-[0.2em] uppercase font-bold">
                 Free Shipping on Orders Above ₹2000 | Modesty Made Modern
             </div>
 
