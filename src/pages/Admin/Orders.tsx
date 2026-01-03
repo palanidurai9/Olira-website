@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { format } from 'date-fns';
-import { Search, Filter, Eye, MoreHorizontal, ChevronDown, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { Search, Eye, ChevronDown, CheckCircle, Clock, XCircle, Phone, Mail, MapPin, Package } from 'lucide-react';
 
 const Orders: React.FC = () => {
     const [orders, setOrders] = useState<any[]>([]);
@@ -51,9 +51,9 @@ const Orders: React.FC = () => {
             if (error) throw error;
             // Fetch will be triggered by subscription, but we can also update locally if needed
             fetchOrders();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error updating status:', error);
-            alert('Failed to update status');
+            alert(`Failed to update status: ${error.message || error.error_description || 'Unknown error'}`);
         }
     };
 
@@ -77,6 +77,19 @@ const Orders: React.FC = () => {
         }
     };
 
+    const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+    const handleDeleteOrder = async (orderId: string) => {
+        if (!confirm('Are you sure you want to delete this order? This action cannot be undone.')) return;
+        try {
+            const { error } = await supabase.from('orders').delete().eq('id', orderId);
+            if (error) throw error;
+            fetchOrders();
+        } catch (error: any) {
+            alert('Error deleting order: ' + error.message);
+        }
+    };
+
     return (
         <div className="pb-20">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -84,6 +97,7 @@ const Orders: React.FC = () => {
                     <h1 className="text-3xl font-serif font-bold text-dark">Orders</h1>
                     <p className="text-gray-500 mt-1">Manage and track all customer orders</p>
                 </div>
+                {/* Filters */}
                 <div className="flex bg-white p-1 rounded-lg border border-gray-200">
                     <button
                         onClick={() => setFilterStatus('ALL')}
@@ -119,9 +133,6 @@ const Orders: React.FC = () => {
                             className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
                         />
                     </div>
-                    <button className="flex items-center gap-2 text-gray-500 hover:text-dark text-sm font-medium px-4 py-2 border border-gray-200 rounded-lg bg-white hover:bg-gray-50 transition-colors">
-                        <Filter size={16} /> Filter
-                    </button>
                 </div>
 
                 {/* Table */}
@@ -177,35 +188,42 @@ const Orders: React.FC = () => {
                                             </span>
                                         </td>
                                         <td className="py-4 px-6">
-                                            <div className="relative group/status inline-block">
-                                                <button className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${getStatusColor(order.order_status)}`}>
+                                            <div className="relative inline-block">
+                                                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${getStatusColor(order.order_status)}`}>
                                                     {order.order_status === 'COMPLETED' && <CheckCircle size={12} />}
                                                     {order.order_status === 'PENDING' && <Clock size={12} />}
                                                     {order.order_status === 'CANCELLED' && <XCircle size={12} />}
-                                                    {order.order_status}
+                                                    <span>{order.order_status}</span>
                                                     <ChevronDown size={12} className="opacity-50" />
-                                                </button>
-                                                {/* Status Dropdown */}
-                                                <div className="absolute top-full left-0 mt-1 w-32 bg-white rounded-lg shadow-xl border border-gray-100 py-1 z-20 hidden group-hover/status:block animate-fade-in">
-                                                    {['PENDING', 'COMPLETED', 'CANCELLED'].map(status => (
-                                                        <button
-                                                            key={status}
-                                                            onClick={() => updateOrderStatus(order.id, status)}
-                                                            className={`block w-full text-left px-4 py-2 text-xs font-medium hover:bg-gray-50 ${order.order_status === status ? 'text-primary' : 'text-gray-600'}`}
-                                                        >
-                                                            {status}
-                                                        </button>
-                                                    ))}
                                                 </div>
+                                                <select
+                                                    value={order.order_status}
+                                                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                    title="Change Status"
+                                                >
+                                                    <option value="PENDING">PENDING</option>
+                                                    <option value="COMPLETED">COMPLETED</option>
+                                                    <option value="CANCELLED">CANCELLED</option>
+                                                </select>
                                             </div>
                                         </td>
                                         <td className="py-4 px-6 text-right">
                                             <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-full transition-colors" title="View Details">
+                                                <button
+                                                    onClick={() => setSelectedOrder(order)}
+                                                    className="p-2 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-full transition-colors"
+                                                    title="View Details"
+                                                >
                                                     <Eye size={18} />
                                                 </button>
-                                                <button className="p-2 text-gray-400 hover:text-dark hover:bg-gray-100 rounded-full transition-colors">
-                                                    <MoreHorizontal size={18} />
+                                                {/* More/Delete Dropdown could go here, for now just a direct delete for 'Actions' request */}
+                                                <button
+                                                    onClick={() => handleDeleteOrder(order.id)}
+                                                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                                    title="Delete Order"
+                                                >
+                                                    <XCircle size={18} />
                                                 </button>
                                             </div>
                                         </td>
@@ -230,6 +248,99 @@ const Orders: React.FC = () => {
                     </table>
                 </div>
             </div>
+
+            {/* View Order Modal */}
+            {selectedOrder && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedOrder(null)} />
+                    <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl relative z-10 overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="flex justify-between items-center p-6 border-b border-gray-100 bg-gray-50/50">
+                            <div>
+                                <h3 className="font-serif font-bold text-xl text-dark">Order #{selectedOrder.order_number}</h3>
+                                <p className="text-sm text-gray-500">{format(new Date(selectedOrder.created_at), 'MMMM d, yyyy h:mm a')}</p>
+                            </div>
+                            <button onClick={() => setSelectedOrder(null)} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-dark">
+                                <XCircle size={24} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 overflow-y-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                                <div>
+                                    <h4 className="font-bold text-dark mb-4 flex items-center gap-2">
+                                        <CheckCircle size={18} className="text-primary" /> Customer Details
+                                    </h4>
+                                    <div className="space-y-2 text-sm text-gray-600">
+                                        <p className="font-medium text-dark text-base">{selectedOrder.customer_name}</p>
+                                        <p className="flex items-center gap-2"><Phone size={14} /> {selectedOrder.phone}</p>
+                                        <p className="flex items-center gap-2"><Mail size={14} /> {selectedOrder.email || 'No email provided'}</p>
+                                        <div className="flex items-start gap-2 mt-2">
+                                            <MapPin size={14} className="mt-1 shrink-0" />
+                                            <p className="whitespace-pre-wrap">{selectedOrder.address}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 className="font-bold text-dark mb-4 flex items-center gap-2">
+                                        <Clock size={18} className="text-secondary" /> Order Summary
+                                    </h4>
+                                    <div className="bg-gray-50 rounded-lg p-4 space-y-3 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Payment Method</span>
+                                            <span className="font-medium text-dark">{selectedOrder.payment_method}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Status</span>
+                                            <span className={`px-2 py-0.5 rounded text-xs font-bold ${selectedOrder.order_status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                                                {selectedOrder.order_status}
+                                            </span>
+                                        </div>
+                                        <div className="border-t border-gray-200 pt-3 flex justify-between text-base font-bold text-dark">
+                                            <span>Total Amount</span>
+                                            <span>₹{selectedOrder.total}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 className="font-bold text-dark mb-4 border-b border-gray-100 pb-2">Order Items ({selectedOrder.items?.length || 0})</h4>
+                            <div className="space-y-4">
+                                {selectedOrder.items?.map((item: any, idx: number) => (
+                                    <div key={idx} className="flex gap-4 items-center bg-white border border-gray-50 p-2 rounded-lg">
+                                        <div className="w-16 h-20 bg-gray-100 rounded-md overflow-hidden shrink-0">
+                                            {item.image ? (
+                                                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                    <Package size={20} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h5 className="font-medium text-dark truncate">{item.name}</h5>
+                                            <p className="text-sm text-gray-500">Size: {item.size} | Qty: {item.quantity}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="font-medium text-dark">₹{item.price * item.quantity}</p>
+                                            <p className="text-xs text-gray-400">₹{item.price} each</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end">
+                            <button
+                                onClick={() => setSelectedOrder(null)}
+                                className="px-6 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-600 hover:text-dark hover:border-gray-300 transition-colors"
+                            >
+                                Close Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
