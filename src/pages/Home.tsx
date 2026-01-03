@@ -70,7 +70,7 @@ const Home: React.FC = () => {
                 <Hero />
 
                 {/* New Arrivals Section */}
-                <section className="pb-16 pt-8 md:pb-24 md:pt-12 bg-white">
+                <section className="pb-16 pt-8 md:pb-24 md:pt-12 bg-neutral">
                     <div className="container-custom">
                         <div className="text-center mb-12">
                             <span className="text-secondary text-sm font-medium tracking-widest uppercase mb-2 block animate-fade-in-up">Latest Drops</span>

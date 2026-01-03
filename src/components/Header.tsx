@@ -50,7 +50,7 @@ const Header: React.FC = () => {
                             </Link>
 
                             {/* Dropdown Menu - Sleek & Minimal */}
-                            <div className="absolute top-full left-0 mt-3 w-48 bg-white border border-gray-100 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 rounded-sm overflow-hidden">
+                            <div className="absolute top-full left-0 mt-3 w-48 bg-neutral border border-gray-100 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 translate-y-2 rounded-sm overflow-hidden">
                                 <div className="py-2 flex flex-col">
                                     {[
                                         { name: 'All Women', path: '/shop' },
@@ -143,7 +143,7 @@ const Header: React.FC = () => {
                             animate={{ x: 0 }}
                             exit={{ x: '-100%' }}
                             transition={{ type: 'tween', duration: 0.3 }}
-                            className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-white z-[70] shadow-2xl md:hidden flex flex-col"
+                            className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-neutral z-[70] shadow-2xl md:hidden flex flex-col"
                         >
                             <div className="p-5 flex justify-between items-center bg-primary">
                                 <img src="/src/assets/olira-text-logo.png" alt="Oliraa" className="h-6 w-auto object-contain" />

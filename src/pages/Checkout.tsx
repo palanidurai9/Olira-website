@@ -84,7 +84,7 @@ const Checkout: React.FC = () => {
     if (cart.length === 0 && !success) {
         // Empty cart redirect
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+            <div className="min-h-screen bg-neutral flex flex-col items-center justify-center p-4">
                 <p className="text-gray-500 mb-4">Your cart is empty.</p>
                 <button onClick={() => navigate('/shop')} className="btn-primary">Go Shopping</button>
             </div>
@@ -93,7 +93,7 @@ const Checkout: React.FC = () => {
 
     if (success) {
         return (
-            <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+            <div className="min-h-screen bg-neutral flex flex-col items-center justify-center p-4">
                 <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md w-full border border-gray-100">
                     <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                         <CheckCircle size={32} />
@@ -109,7 +109,7 @@ const Checkout: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-neutral">
 
             <div className="container-custom py-8">
                 <button onClick={() => navigate('/cart')} className="flex items-center text-gray-500 hover:text-dark mb-8 text-sm">

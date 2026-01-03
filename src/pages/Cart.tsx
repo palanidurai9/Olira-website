@@ -12,7 +12,7 @@ const Cart: React.FC = () => {
     // Let's rewrite the Cart Page assuming we will fix the Context to have 'updateQuantity(id, newQuantity)'
 
     return (
-        <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="min-h-screen bg-neutral flex flex-col">
 
             <div className="container-custom py-12 flex-grow">
                 <div className="flex items-center justify-between mb-8">

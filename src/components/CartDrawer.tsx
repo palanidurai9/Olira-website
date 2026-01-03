@@ -38,7 +38,7 @@ const CartDrawer: React.FC = () => {
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                        className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-[70] flex flex-col"
+                        className="fixed inset-y-0 right-0 w-full max-w-md bg-neutral shadow-2xl z-[70] flex flex-col"
                     >
                         {/* Header */}
                         <div className="p-6 border-b border-gray-100 flex items-center justify-between">

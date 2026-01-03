@@ -73,7 +73,7 @@ const Footer: React.FC = () => {
     ];
 
     return (
-        <footer className="bg-[#fcfbf9] pt-16 pb-8 border-t border-gray-100">
+        <footer className="bg-neutral pt-16 pb-8 border-t border-gray-100">
             <div className="container-custom px-4 max-w-7xl mx-auto">
 
                 {/* Brand Logo - Centered */}

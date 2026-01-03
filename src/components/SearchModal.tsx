@@ -96,7 +96,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.95, y: -10 }}
                             transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="w-full max-w-[600px] bg-white rounded-lg shadow-2xl overflow-hidden max-h-[calc(100vh-8rem)] flex flex-col pointer-events-auto"
+                            className="w-full max-w-[600px] bg-neutral rounded-lg shadow-2xl overflow-hidden max-h-[calc(100vh-8rem)] flex flex-col pointer-events-auto"
                         >
                             {/* Search Header */}
                             <div className="p-4 border-b border-gray-100 flex items-center gap-3">

@@ -55,9 +55,9 @@ const ProductPage: React.FC = () => {
         addToCart(product, selectedSize, quantity);
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-white"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
+    if (loading) return <div className="min-h-screen flex items-center justify-center bg-neutral"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
     if (error || !product) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-neutral">
             <h2 className="text-2xl font-serif font-bold mb-4">Product Not Found</h2>
             <Link to="/shop" className="btn-primary">Back to Shop</Link>
         </div>
@@ -68,7 +68,7 @@ const ProductPage: React.FC = () => {
     const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
 
     return (
-        <div className="min-h-screen bg-white pb-20 overflow-x-hidden">
+        <div className="min-h-screen bg-neutral pb-20 overflow-x-hidden">
 
             <div className="container-custom pt-8 pb-16">
                 {/* Breadcrumbs */}

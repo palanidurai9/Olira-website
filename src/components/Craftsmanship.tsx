@@ -29,7 +29,7 @@ const Craftsmanship: React.FC = () => {
     ];
 
     return (
-        <section className="bg-white py-16 md:py-24">
+        <section className="bg-neutral py-16 md:py-24">
             <div className="container-custom mx-auto px-4">
                 <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
 

@@ -89,7 +89,7 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
         });
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-neutral">
 
             {/* Header Banner */}
             <div className="bg-neutral py-12 md:py-20 text-center px-4">

@@ -38,7 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
                 {/* Quick Add Overlay (Desktop) */}
                 <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden md:block">
-                    <button className="w-full bg-white/90 backdrop-blur text-dark py-3 text-sm font-medium hover:bg-primary hover:text-white transition-colors uppercase tracking-widest">
+                    <button className="w-full bg-neutral/90 backdrop-blur text-dark py-3 text-sm font-medium hover:bg-primary hover:text-white transition-colors uppercase tracking-widest">
                         View Details
                     </button>
                 </div>
