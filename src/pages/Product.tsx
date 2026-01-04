@@ -1,10 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import type { Product } from '../types';
 import { useCart } from '../context/CartContext';
 import { Star, Truck, ShieldCheck } from 'lucide-react';
+import Reviews from '../components/Reviews';
 
 const ProductPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
@@ -16,9 +16,16 @@ const ProductPage: React.FC = () => {
     const { addToCart } = useCart();
     const [error, setError] = useState<string | null>(null);
 
+    // Review Stats
+    const [reviewStats, setReviewStats] = useState({ count: 0, average: 0 });
+
     useEffect(() => {
         if (slug) fetchProduct(slug);
     }, [slug]);
+
+    useEffect(() => {
+        if (product?.id) fetchReviewStats(product.id);
+    }, [product]);
 
     const fetchProduct = async (slug: string) => {
         setLoading(true);
@@ -46,6 +53,21 @@ const ProductPage: React.FC = () => {
         }
     };
 
+    const fetchReviewStats = async (productId: string) => {
+        const { data } = await supabase
+            .from('reviews')
+            .select('rating')
+            .eq('product_id', productId);
+
+        if (data && data.length > 0) {
+            const total = data.reduce((acc, curr) => acc + curr.rating, 0);
+            setReviewStats({
+                count: data.length,
+                average: total / data.length
+            });
+        }
+    };
+
     const handleAddToCart = () => {
         if (!product) return;
         if (!selectedSize) {
@@ -53,6 +75,10 @@ const ProductPage: React.FC = () => {
             return;
         }
         addToCart(product, selectedSize, quantity);
+    };
+
+    const scrollToReviews = () => {
+        document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' });
     };
 
     if (loading) return <div className="min-h-screen flex items-center justify-center bg-neutral"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
@@ -80,7 +106,7 @@ const ProductPage: React.FC = () => {
                     <span className="text-dark font-medium truncate max-w-[200px] sm:max-w-xs">{product.name}</span>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start mb-20">
                     {/* Image Section */}
                     <div className="space-y-4 lg:space-y-0 lg:flex lg:flex-row-reverse lg:gap-4 lg:sticky lg:top-28 w-full">
                         {/* Main Image */}
@@ -123,11 +149,23 @@ const ProductPage: React.FC = () => {
                                     {originalPrice && <span className="text-base text-gray-400 line-through">₹{originalPrice}</span>}
                                 </div>
                                 <div className="h-4 w-px bg-gray-200"></div>
-                                <div className="flex items-center text-yellow-500 text-xs gap-1">
+                                <div
+                                    className="flex items-center text-yellow-500 text-xs gap-1 cursor-pointer hover:opacity-80 transition-opacity"
+                                    onClick={scrollToReviews}
+                                >
                                     <div className="flex">
-                                        {[...Array(5)].map((_, i) => <Star key={i} size={14} fill="currentColor" className="text-yellow-400" />)}
+                                        {[...Array(5)].map((_, i) => (
+                                            <Star
+                                                key={i}
+                                                size={14}
+                                                fill={i < Math.round(reviewStats.average) ? "currentColor" : "none"}
+                                                className={i < Math.round(reviewStats.average) ? "text-yellow-400" : "text-gray-300"}
+                                            />
+                                        ))}
                                     </div>
-                                    <span className="text-gray-400 ml-1 underline decoration-gray-300 underline-offset-4 decoration-1 hover:text-dark cursor-pointer">12 Reviews</span>
+                                    <span className="text-gray-400 ml-1 underline decoration-gray-300 underline-offset-4 decoration-1 hover:text-dark">
+                                        {reviewStats.count} Reviews
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -231,6 +269,10 @@ const ProductPage: React.FC = () => {
                         </div>
                     </div>
                 </div>
+
+                {/* Reviews Section */}
+                <Reviews productId={product.id} />
+
             </div>
         </div>
     );
