@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { LayoutDashboard, ShoppingBag, Package, LogOut } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Package, LogOut, Tag } from 'lucide-react';
 
 const AdminLayout: React.FC = () => {
     const navigate = useNavigate();
@@ -66,6 +66,10 @@ const AdminLayout: React.FC = () => {
                         <NavLink to="/admin/orders" className={({ isActive }) => `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-primary/10 text-primary font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-dark'}`}>
                             <ShoppingBag size={20} />
                             <span>Orders</span>
+                        </NavLink>
+                        <NavLink to="/admin/coupons" className={({ isActive }) => `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${isActive ? 'bg-primary/10 text-primary font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-dark'}`}>
+                            <Tag size={20} />
+                            <span>Coupons</span>
                         </NavLink>
                     </div>
                 </nav>

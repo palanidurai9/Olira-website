@@ -8,6 +8,7 @@ import AdminLayout from './pages/Admin/Layout';
 import Dashboard from './pages/Admin/Dashboard';
 import Products from './pages/Admin/Products';
 import Orders from './pages/Admin/Orders';
+import Coupons from './pages/Admin/Coupons';
 import ProductPage from './pages/Product';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
@@ -77,6 +78,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="products" element={<Products />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="coupons" element={<Coupons />} />
           </Route>
         </Routes>
       </Router>

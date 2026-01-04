@@ -296,6 +296,12 @@ const Orders: React.FC = () => {
                                                 {selectedOrder.order_status}
                                             </span>
                                         </div>
+                                        {selectedOrder.discount_amount > 0 && (
+                                            <div className="flex justify-between text-green-600">
+                                                <span>Discount {selectedOrder.coupon_code && `(${selectedOrder.coupon_code})`}</span>
+                                                <span>-₹{selectedOrder.discount_amount}</span>
+                                            </div>
+                                        )}
                                         <div className="border-t border-gray-200 pt-3 flex justify-between text-base font-bold text-dark">
                                             <span>Total Amount</span>
                                             <span>₹{selectedOrder.total}</span>
