@@ -5,7 +5,10 @@ import type { Product, Category } from '../../types';
 import { Plus, Edit2, Trash2, Search, X, Save, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
+import { useLocation } from 'react-router-dom';
+
 const Products: React.FC = () => {
+    const location = useLocation();
     const [products, setProducts] = useState<Product[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
@@ -24,6 +27,19 @@ const Products: React.FC = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // Check for edit request from navigation
+    useEffect(() => {
+        const state = location.state as { editProductId?: string } | null;
+        if (products.length > 0 && state?.editProductId) {
+            const productToEdit = products.find(p => p.id === state.editProductId);
+            if (productToEdit) {
+                handleOpenSidebar(productToEdit);
+                // Optional: Clear state to avoid reopening if user closes and refreshes?
+                // window.history.replaceState({}, '');
+            }
+        }
+    }, [products, location.state]);
 
     const fetchData = async () => {
         setLoading(true);

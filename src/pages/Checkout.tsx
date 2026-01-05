@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -6,10 +5,35 @@ import { supabase } from '../lib/supabase';
 import { ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
 
 const Checkout: React.FC = () => {
-    const { cart, cartTotal, clearCart, cartSubtotal, discountAmount, coupon } = useCart();
+    const { cart, cartTotal, clearCart, cartSubtotal, discountAmount, coupon, applyCoupon, removeCoupon } = useCart();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+
+    // Coupon State
+    const [couponCode, setCouponCode] = useState('');
+    const [couponLoading, setCouponLoading] = useState(false);
+    const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode.trim()) return;
+        setCouponLoading(true);
+        setCouponMessage(null);
+
+        try {
+            const result = await applyCoupon(couponCode);
+            if (result.success) {
+                setCouponMessage({ type: 'success', text: result.message });
+                setCouponCode('');
+            } else {
+                setCouponMessage({ type: 'error', text: result.message });
+            }
+        } catch (error) {
+            setCouponMessage({ type: 'error', text: 'Failed to apply coupon' });
+        } finally {
+            setCouponLoading(false);
+        }
+    };
 
     // Form State
     const [formData, setFormData] = useState({
@@ -73,23 +97,10 @@ const Checkout: React.FC = () => {
 
             // Increase Coupon Usage Count
             if (coupon) {
-                // We need to fetch ID or just update by code
-                // Ideally we should know the ID, but code is unique.
-                // Let's assume code is sufficient or we do a lookup.
-                // Actually the cleanest way is update coupons set used_count = used_count + 1 where code = ...
-                // But RLS might prevent update if not admin? 
-                // Wait, I didn't give Public UPDATE rights on Coupons.
-                // Creating an order is done by public/authenticated user.
-                // If the user is not admin, this update might fail.
-                // However, we can use an RPC function or just ignore it for MVP.
-                // Or, better, if this is a real app, I should create a Postgres trigger on order creation.
-                // Since I cannot create triggers easily without SQL access for the user to run deeply, 
-                // I will skip the usage count update from frontend to avoid errors, or try it and catch error silently.
                 try {
                     await supabase.rpc('increment_coupon_usage', { coupon_code: coupon.code });
                 } catch (rpcError) {
-                    // If RPC doesn't exist, maybe try direct update if allowed
-                    // console.log('Could not update usage count', rpcError);
+                    // Ignore if RPC missing or error
                 }
             }
 
@@ -97,7 +108,6 @@ const Checkout: React.FC = () => {
             setSuccess(true);
             setTimeout(() => {
                 clearCart();
-                // Ideally redirect to a specific success page, but valid here too.
             }, 500);
 
         } catch (error: any) {
@@ -238,6 +248,51 @@ const Checkout: React.FC = () => {
                                         <span>₹{(item.sale_price || item.price) * item.quantity}</span>
                                     </div>
                                 ))}
+                            </div>
+
+                            {/* Coupon Section */}
+                            <div className="py-4 border-t border-gray-100">
+                                {coupon ? (
+                                    <div className="bg-green-50 border border-green-100 p-3 rounded-md flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm font-medium text-green-800">Coupon Applied</p>
+                                            <p className="text-xs text-green-600 font-mono mt-1">{coupon.code}</p>
+                                        </div>
+                                        <button
+                                            onClick={() => {
+                                                removeCoupon();
+                                                setCouponMessage(null);
+                                            }}
+                                            className="text-red-500 hover:text-red-700 text-xs font-medium"
+                                        >
+                                            Remove
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <div className="flex gap-2">
+                                            <input
+                                                type="text"
+                                                value={couponCode}
+                                                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                                placeholder="Coupon Code"
+                                                className="flex-1 border border-gray-200 p-2 rounded-md text-sm outline-none focus:border-primary uppercase placeholder:normal-case"
+                                            />
+                                            <button
+                                                onClick={handleApplyCoupon}
+                                                disabled={couponLoading || !couponCode}
+                                                className="bg-dark text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                {couponLoading ? '...' : 'Apply'}
+                                            </button>
+                                        </div>
+                                        {couponMessage && (
+                                            <p className={`text-xs ${couponMessage.type === 'success' ? 'text-green-600' : 'text-red-500'}`}>
+                                                {couponMessage.text}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="pt-4 border-t border-gray-100 space-y-2 mb-4">

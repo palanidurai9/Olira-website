@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DollarSign, ShoppingBag, Users, TrendingUp } from 'lucide-react';
 import { format, subDays, isSameDay, parseISO } from 'date-fns';
 
 import { supabase } from '../../lib/supabase';
 
 const Dashboard: React.FC = () => {
+    const navigate = useNavigate();
     const [stats, setStats] = React.useState([
         { label: 'Total Sales', value: '₹0', icon: DollarSign, change: '+0%', color: 'text-green-600', bg: 'bg-green-100' },
         { label: 'Total Orders', value: '0', icon: ShoppingBag, change: '+0%', color: 'text-blue-600', bg: 'bg-blue-100' },
@@ -260,7 +262,12 @@ const Dashboard: React.FC = () => {
                                         <h4 className="text-sm font-medium text-dark truncate">{product.name}</h4>
                                         <p className="text-xs text-gray-500">Stock: <span className="font-bold text-red-600">{product.stock}</span> left</p>
                                     </div>
-                                    <button className="text-xs bg-white border border-gray-200 px-2 py-1 rounded hover:bg-gray-50">Restock</button>
+                                    <button
+                                        onClick={() => navigate('/admin/products', { state: { editProductId: product.id } })}
+                                        className="text-xs bg-white border border-blue-600 text-blue-600 px-3 py-1.5 rounded font-medium hover:bg-blue-50 transition-colors"
+                                    >
+                                        Restock
+                                    </button>
                                 </div>
                             ))
                         ) : (
