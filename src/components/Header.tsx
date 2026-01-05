@@ -1,15 +1,17 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Menu, X, Search, Phone } from 'lucide-react';
+import { ShoppingBag, Menu, X, Search, Phone, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import SearchModal from './SearchModal';
 
 const Header: React.FC = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const { cart, setIsCartOpen } = useCart();
+    const { user } = useAuth();
 
     return (
         <>
@@ -111,6 +113,15 @@ const Header: React.FC = () => {
                         >
                             <Phone size={20} strokeWidth={1.5} />
                         </a>
+
+                        {/* User Account */}
+                        <Link
+                            to={user ? "/account" : "/login"}
+                            className="hidden md:block text-white/90 hover:text-white transition-colors"
+                            title={user ? "My Account" : "Login"}
+                        >
+                            <UserIcon size={20} strokeWidth={1.5} />
+                        </Link>
 
                         {/* Cart Button */}
                         <div className="relative cursor-pointer group" onClick={() => setIsCartOpen(true)}>

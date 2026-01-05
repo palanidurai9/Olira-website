@@ -1,39 +1,31 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { LayoutDashboard, ShoppingBag, Package, LogOut, Tag } from 'lucide-react';
 
 const AdminLayout: React.FC = () => {
+    const { user, profile, loading: authLoading } = useAuth();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
 
-    // Auth Guard
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
+        if (!authLoading) {
+            if (!user) {
                 navigate('/admin/login');
+            } else if (profile && profile.role !== 'admin') {
+                // If logged in but not admin, redirect to home
+                navigate('/');
             }
-            setLoading(false);
-        });
-
-        const {
-            data: { subscription },
-        } = supabase.auth.onAuthStateChange((_event, session) => {
-            if (!session) {
-                navigate('/admin/login');
-            }
-        });
-
-        return () => subscription.unsubscribe();
-    }, [navigate]);
+        }
+    }, [user, profile, authLoading, navigate]);
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
         navigate('/admin/login');
     };
 
-    if (loading) return (
+    if (authLoading) return (
         <div className="min-h-screen flex items-center justify-center bg-white">
             <div className="animate-pulse flex flex-col items-center">
                 <div className="h-12 w-12 bg-gray-200 rounded-full mb-4"></div>

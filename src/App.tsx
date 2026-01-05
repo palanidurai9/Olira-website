@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { CartProvider } from './context/CartContext';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
-import Login from './pages/Admin/Login';
+import AdminLogin from './pages/Admin/Login';
 import AdminLayout from './pages/Admin/Layout';
 import Dashboard from './pages/Admin/Dashboard';
 import Products from './pages/Admin/Products';
@@ -31,58 +31,70 @@ import CartDrawer from './components/CartDrawer';
 import PublicLayout from './components/PublicLayout';
 import ScrollToTop from './components/ScrollToTop';
 
+import { AuthProvider } from './context/AuthContext';
+import CustomerLogin from './pages/Auth/Login';
+import Signup from './pages/Auth/Signup';
+import Account from './pages/Account/Profile';
+
 function App() {
   return (
-    <CartProvider>
-      <Router>
-        <ScrollToTop />
-        <CartDrawer />
-        <FloatingWhatsApp />
-        <Routes>
-          {/* Public Routes with Header & Footer */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/sarees" element={<Shop forcedCategory="sarees" pageTitle="Sarees" pageDescription="Beautiful handcrafted sarees." />} />
-            <Route path="/kurtis" element={<Shop forcedCategory="kurtis" pageTitle="Kurtis" pageDescription="Stylish and comfortable kurtis." />} />
-            <Route path="/dresses" element={<Shop forcedCategory="dresses" pageTitle="Dresses" pageDescription="Modest and elegant dresses." />} />
-            <Route path="/coord-sets" element={<Shop forcedCategory="coord-sets" pageTitle="Co-ord Sets" pageDescription="Matching sets for easy style." />} />
-            <Route path="/product/:slug" element={<ProductPage />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/about" element={<About />} />
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <ScrollToTop />
+          <CartDrawer />
+          <FloatingWhatsApp />
+          <Routes>
+            {/* Public Routes with Header & Footer */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/sarees" element={<Shop forcedCategory="sarees" pageTitle="Sarees" pageDescription="Beautiful handcrafted sarees." />} />
+              <Route path="/kurtis" element={<Shop forcedCategory="kurtis" pageTitle="Kurtis" pageDescription="Stylish and comfortable kurtis." />} />
+              <Route path="/dresses" element={<Shop forcedCategory="dresses" pageTitle="Dresses" pageDescription="Modest and elegant dresses." />} />
+              <Route path="/coord-sets" element={<Shop forcedCategory="coord-sets" pageTitle="Co-ord Sets" pageDescription="Matching sets for easy style." />} />
+              <Route path="/product/:slug" element={<ProductPage />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/about" element={<About />} />
 
-            {/* New Customer Care Pages */}
-            <Route path="/shipping" element={<Shipping />} />
-            <Route path="/returns" element={<Returns />} />
-            <Route path="/size-guide" element={<SizeGuide />} />
-            <Route path="/track-order" element={<TrackOrder />} />
-            <Route path="/faq" element={<FAQ />} />
+              {/* Auth Routes */}
+              <Route path="/login" element={<CustomerLogin />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/account" element={<Account />} />
 
-            {/* New Legal Pages */}
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/cookies" element={<CookiesPage />} />
-            <Route path="/return-policy" element={<ReturnPolicy />} />
+              {/* New Customer Care Pages */}
+              <Route path="/shipping" element={<Shipping />} />
+              <Route path="/returns" element={<Returns />} />
+              <Route path="/size-guide" element={<SizeGuide />} />
+              <Route path="/track-order" element={<TrackOrder />} />
+              <Route path="/faq" element={<FAQ />} />
 
-            {/* New Arrivals */}
-            <Route path="/new-arrivals" element={<Shop pageTitle="New Arrivals" pageDescription="Be the first to wear our latest designs." />} />
-          </Route>
+              {/* New Legal Pages */}
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/cookies" element={<CookiesPage />} />
+              <Route path="/return-policy" element={<ReturnPolicy />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<Login />} />
+              {/* New Arrivals */}
+              <Route path="/new-arrivals" element={<Shop pageTitle="New Arrivals" pageDescription="Be the first to wear our latest designs." />} />
+            </Route>
 
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="products" element={<Products />} />
-            <Route path="orders" element={<Orders />} />
-            <Route path="coupons" element={<Coupons />} />
-          </Route>
-        </Routes>
-      </Router>
-    </CartProvider>
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="products" element={<Products />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="coupons" element={<Coupons />} />
+            </Route>
+          </Routes>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
   );
 }
 
