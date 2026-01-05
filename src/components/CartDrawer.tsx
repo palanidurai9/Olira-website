@@ -44,7 +44,7 @@ const CartDrawer: React.FC = () => {
                         <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                             <h2 className="text-xl font-serif font-bold text-dark flex items-center">
                                 <ShoppingBag className="mr-2" size={20} />
-                                Your Cart ({cart.reduce((acc, item) => acc + item.quantity, 0)})
+                                Your Cart ({cart.length})
                             </h2>
                             <button
                                 onClick={() => setIsCartOpen(false)}

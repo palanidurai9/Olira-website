@@ -117,7 +117,7 @@ const Header: React.FC = () => {
                             <ShoppingBag size={20} strokeWidth={1.5} className="text-white/90 group-hover:text-white transition-colors" />
                             {cart.length > 0 && (
                                 <span className="absolute -top-1.5 -right-1.5 bg-secondary text-primary text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold">
-                                    {cart.reduce((acc, item) => acc + item.quantity, 0)}
+                                    {cart.length}
                                 </span>
                             )}
                         </div>
