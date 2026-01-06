@@ -213,11 +213,17 @@ const ProductPage: React.FC = () => {
                                         +
                                     </button>
                                 </div>
-                                <span className="text-xs text-gray-500">
-                                    {product.stock > 0 ? `${product.stock} pieces in stock` : 'Out of Stock'}
-                                </span>
                             </div>
+                            <span className="text-xs text-red-600 font-medium mt-2 block">
+                                {product.stock > 0
+                                    ? product.stock < 20
+                                        ? `Only ${product.stock} pieces left!`
+                                        : `Limited Stock: ${product.stock} pieces available`
+                                    : 'Out of Stock'
+                                }
+                            </span>
                         </div>
+
 
                         {/* Actions */}
                         <div className="flex gap-4 mb-10 w-full">
@@ -274,7 +280,7 @@ const ProductPage: React.FC = () => {
                 <Reviews productId={product.id} />
 
             </div>
-        </div>
+        </div >
     );
 };
 
