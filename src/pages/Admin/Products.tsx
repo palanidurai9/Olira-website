@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import type { Product, Category } from '../../types';
-import { Plus, Edit2, Trash2, Search, X, Save, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, Save, Loader2, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 
 import { useLocation } from 'react-router-dom';
@@ -63,6 +63,41 @@ const Products: React.FC = () => {
             });
         }
         setIsSidebarOpen(true);
+    };
+
+    const [uploading, setUploading] = useState<{ [key: number]: boolean }>({});
+
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+        try {
+            if (!event.target.files || event.target.files.length === 0) {
+                return;
+            }
+            const file = event.target.files[0];
+            setUploading(prev => ({ ...prev, [index]: true }));
+
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${Date.now()}-${Math.floor(Math.random() * 1000)}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('products')
+                .upload(filePath, file);
+
+            if (uploadError) {
+                throw uploadError;
+            }
+
+            const { data } = supabase.storage.from('products').getPublicUrl(filePath);
+
+            const newImages = [...(currentProduct.images || [])];
+            newImages[index] = { ...newImages[index], image_url: data.publicUrl };
+            setCurrentProduct({ ...currentProduct, images: newImages });
+
+        } catch (error: any) {
+            alert('Error uploading image: ' + error.message);
+        } finally {
+            setUploading(prev => ({ ...prev, [index]: false }));
+        }
     };
 
     const handleSave = async (e: React.FormEvent) => {
@@ -264,17 +299,23 @@ const Products: React.FC = () => {
                                                         <img src={img.image_url} alt={`Preview ${index}`} className="w-full h-full object-cover" />
                                                     </div>
                                                 )}
-                                                <input
-                                                    type="url"
-                                                    value={img.image_url}
-                                                    onChange={e => {
-                                                        const newImages = [...(currentProduct.images || [])];
-                                                        newImages[index] = { ...newImages[index], image_url: e.target.value };
-                                                        setCurrentProduct({ ...currentProduct, images: newImages });
-                                                    }}
-                                                    className="w-full p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                                                    placeholder="Paste image URL..."
-                                                />
+                                                <div className="flex gap-2">
+                                                    <input
+                                                        type="url"
+                                                        value={img.image_url}
+                                                        onChange={e => {
+                                                            const newImages = [...(currentProduct.images || [])];
+                                                            newImages[index] = { ...newImages[index], image_url: e.target.value };
+                                                            setCurrentProduct({ ...currentProduct, images: newImages });
+                                                        }}
+                                                        className="flex-1 p-2 border border-gray-200 rounded-md focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                                                        placeholder="Paste image URL or upload..."
+                                                    />
+                                                    <label className="cursor-pointer p-2 bg-gray-50 border border-gray-200 rounded hover:bg-gray-100 transition-colors flex items-center justify-center min-w-[42px]" title="Upload Image">
+                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, index)} />
+                                                        {uploading[index] ? <Loader2 size={18} className="animate-spin text-primary" /> : <Upload size={18} className="text-gray-600" />}
+                                                    </label>
+                                                </div>
                                             </div>
                                             <button
                                                 type="button"
