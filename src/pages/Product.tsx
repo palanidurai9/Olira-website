@@ -184,8 +184,8 @@ const ProductPage: React.FC = () => {
                                         key={size}
                                         onClick={() => setSelectedSize(size)}
                                         className={`h-10 min-w-[3rem] px-3 flex items-center justify-center border text-sm transition-all ${selectedSize === size
-                                            ? 'bg-black text-white border-black'
-                                            : 'bg-white text-dark border-gray-200 hover:border-black'
+                                            ? 'bg-primary text-white border-primary'
+                                            : 'bg-white text-dark border-gray-200 hover:border-primary'
                                             }`}
                                     >
                                         {size}
@@ -201,14 +201,14 @@ const ProductPage: React.FC = () => {
                                 <div className="flex items-center border border-gray-200 h-10 w-32">
                                     <button
                                         onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                        className="flex-1 h-full flex items-center justify-center hover:bg-gray-50 transition-colors"
+                                        className="flex-1 h-full flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
                                     >
                                         -
                                     </button>
                                     <div className="w-10 text-center text-sm font-medium">{quantity}</div>
                                     <button
                                         onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
-                                        className="flex-1 h-full flex items-center justify-center hover:bg-gray-50 transition-colors"
+                                        className="flex-1 h-full flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
                                     >
                                         +
                                     </button>
@@ -230,7 +230,7 @@ const ProductPage: React.FC = () => {
                             <button
                                 onClick={handleAddToCart}
                                 disabled={product.stock === 0}
-                                className="flex-1 bg-black text-white py-4 font-medium hover:bg-gray-800 transition-all uppercase tracking-widest text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 bg-primary text-white py-4 font-medium hover:bg-secondary transition-all uppercase tracking-widest text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                             </button>
