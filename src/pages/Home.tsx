@@ -129,7 +129,7 @@ const Home: React.FC = () => {
                                             <Link
                                                 key={category.id}
                                                 to={`/shop?category=${category.slug}`}
-                                                className="group relative overflow-hidden rounded-xl hover:bg-white/20 transition-all w-40 h-40 md:w-56 md:h-64 flex flex-col items-center justify-center text-center p-4 border-[0.5px] border-primary/20 hover:border-primary/40"
+                                                className="group relative overflow-hidden rounded-xl hover:bg-white/20 transition-all w-40 h-40 md:w-56 md:h-64 flex flex-col items-center justify-center text-center p-4 border-[0.5px] border-primary/20 hover:border-primary"
                                             >
                                                 <div className="w-16 h-16 md:w-20 md:h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-500 overflow-hidden">
                                                     {categoryImage ? (
@@ -139,7 +139,7 @@ const Home: React.FC = () => {
                                                     )}
                                                 </div>
                                                 <h3 className="font-medium text-dark group-hover:text-primary transition-colors">{category.name}</h3>
-                                                <span className="text-xs text-gray-400 mt-1 uppercase tracking-wider group-hover:translate-x-1 transition-transform inline-flex items-center">
+                                                <span className="text-xs text-gray-400 mt-1 uppercase tracking-wider group-hover:translate-x-1 group-hover:text-primary transition-all inline-flex items-center">
                                                     Explore <ArrowRight size={12} className="ml-1" />
                                                 </span>
                                             </Link>
