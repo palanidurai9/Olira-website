@@ -69,7 +69,7 @@ const Craftsmanship: React.FC = () => {
                             ))}
                         </div>
 
-                        <Link to="/shop" className="inline-flex items-center px-8 py-3 bg-gray-100 text-dark text-sm font-medium rounded-lg hover:bg-primary hover:text-white transition-all duration-300">
+                        <Link to="/shop" className="inline-flex items-center px-8 py-3 bg-white text-dark text-sm font-medium rounded-lg hover:bg-primary hover:text-white transition-all duration-300">
                             Shop now <ArrowRight size={16} className="ml-2" />
                         </Link>
                     </div>
