@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import aboutStoryImage from '../assets/about-story.png';
 
 const About: React.FC = () => {
     return (
@@ -22,7 +23,7 @@ const About: React.FC = () => {
                         transition={{ delay: 0.3, duration: 0.6 }}
                         className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto font-medium"
                     >
-                        Modesty Made Modern. Redefining elegance for the contemporary woman.
+                        Modesty, made modern. Redefining Indian aesthetics for the modern woman.
                     </motion.p>
                 </div>
             </div>
@@ -31,23 +32,31 @@ const About: React.FC = () => {
             <div className="container-custom py-20">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
                     <div className="order-2 md:order-1 space-y-6">
-                        <h2 className="text-3xl font-serif font-bold text-dark">The Art of Elegance</h2>
-                        <div className="space-y-4 text-gray-600 leading-relaxed">
+                        <h2 className="text-3xl font-serif font-bold text-dark">Modesty, Made Modern</h2>
+                        <div className="space-y-4 text-gray-600 leading-relaxed text-justify">
                             <p>
-                                At <span className="font-bold text-primary">Oliraa</span>, we believe that modesty is not just a style choice—it's a statement of grace, confidence, and individuality. Founded with a vision to bridge the gap between traditional values and modern aesthetics, Oliraa is more than just a clothing brand; it's a celebration of the modern woman.
+                                <span className="font-bold text-primary">Oliraa</span> is an Indo-contemporary womenswear label founded by sisters <span className="font-medium text-dark">Arivunila Ravichandrran</span> and <span className="font-medium text-dark">Yogavani Ravichandrran</span>, shaped by a shared vision to redefine Indian aesthetics for the modern woman.
                             </p>
                             <p>
-                                Our journey began with a simple observation: the search for high-quality, fashionable, and modest clothing was often a compromise. We set out to change that. Every piece in our collection is thoughtfully designed to offer the perfect blend of coverage, comfort, and chic style.
+                                At Oliraa, we believe modesty is not restrictive—it is powerful. It is fluid, expressive, and deeply personal. Our philosophy, <span className="italic">"Modesty, made modern"</span>, reflects our belief that our designs blur the lines between traditional and modern. We believe Indian women can own both tradition and modernity effortlessly.
                             </p>
                             <p>
-                                From our hand-picked fabrics to our intricate detailing, we pay attention to the little things that make a big difference. Whether it's a flowing saree for a festive occasion or a tailored kurti for everyday wear, Oliraa promises quality that you can feel and style that you can own.
+                                What sets Oliraa apart is our focus on clean silhouettes, refined details, and a balanced blend of tradition and modernity. Each outfit is thoughtfully designed to feel wearable, comfortable, and relevant—whether styled traditionally, worn in a modern way, or paired with western elements—proving that Indian wear is not bound by labels.
                             </p>
+                            <p>
+                                Oliraa is for women who express confidence quietly. Women who value heritage but dress for the present. Women who believe modesty and modernity are not opposites, but beautifully intertwined.
+                            </p>
+                            <div className="pt-4 border-l-4 border-primary pl-4 my-6">
+                                <p className="text-lg font-serif italic text-dark">
+                                    "This is not fashion driven by noise. This is style shaped by meaning. This is Oliraa."
+                                </p>
+                            </div>
                         </div>
                     </div>
-                    <div className="order-1 md:order-2 h-[500px] bg-gray-100 rounded-lg overflow-hidden relative">
+                    <div className="order-1 md:order-2 h-[600px] bg-gray-100 rounded-lg overflow-hidden relative shadow-xl">
                         <img
-                            src="https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?q=80&w=2070&auto=format&fit=crop"
-                            alt="Oliraa Fashion"
+                            src={aboutStoryImage}
+                            alt="The Oliraa Woman"
                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                         />
                     </div>
