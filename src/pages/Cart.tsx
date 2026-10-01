@@ -203,7 +203,7 @@ const Cart: React.FC = () => {
                                 </button>
 
                                 <div className="mt-4 text-xs text-center text-gray-400">
-                                    <p>Secure Checkout powered by Supabase</p>
+                                    <p>Secure Checkout powered by Firebase & Razorpay</p>
                                 </div>
                             </div>
                         </div>

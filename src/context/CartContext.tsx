@@ -1,24 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { Product } from '../types';
-import { supabase } from '../lib/supabase';
-
-export interface CartItem extends Product {
-    cartId: string;
-    selectedSize: string;
-    quantity: number;
-}
-
-export interface Coupon {
-    code: string;
-    discount_type: 'PERCENTAGE' | 'FIXED';
-    discount_value: number;
-    min_order_value: number;
-    max_discount_amount?: number;
-}
+import type { Product, CartItem, Coupon } from '../types';
+import { validateCoupon } from '../services/couponService';
 
 interface CartContextType {
     cart: CartItem[];
-    addToCart: (product: Product, size: string, quantity?: number) => void;
+    addToCart: (product: Product, size: string, quantity?: number, color?: string, variantId?: string) => void;
     removeFromCart: (cartId: string) => void;
     updateQuantity: (cartId: string, delta: number) => void;
     clearCart: () => void;
@@ -36,42 +22,47 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [cart, setCart] = useState<CartItem[]>(() => {
-        const saved = localStorage.getItem('olira-cart');
-        return saved ? JSON.parse(saved) : [];
+        try {
+            const saved = localStorage.getItem('olira-cart');
+            return saved ? JSON.parse(saved) : [];
+        } catch {
+            return [];
+        }
     });
+
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [coupon, setCoupon] = useState<Coupon | null>(null);
 
     useEffect(() => {
-        localStorage.setItem('olira-cart', JSON.stringify(cart));
+        try {
+            localStorage.setItem('olira-cart', JSON.stringify(cart));
+        } catch (e) {
+            console.error('Failed to save cart to localStorage:', e);
+        }
     }, [cart]);
 
-    // Recalculate coupon validity if cart changes (optional, but good for min_order_value check)
-    useEffect(() => {
-        if (coupon) {
-            const subtotal = cart.reduce((total, item) => {
-                const price = item.sale_price || item.price;
-                return total + (price * item.quantity);
-            }, 0);
+    const cartSubtotal = cart.reduce((total, item) => {
+        const price = item.sale_price || item.price;
+        return total + (price * item.quantity);
+    }, 0);
 
-            if (subtotal < coupon.min_order_value) {
-                // Should we remove it automatically or just let the user know? 
-                // For simplicity, let's just keep it but it won't apply discount if logic in discount calculation checks it.
-                // But my discount calculation logic below handles it "silently" or we should explicitly remove it.
-                // Let's explicitly remove if it violates.
-                // Actually, let's just leave it there but make discount 0 or show error.
-                // Decision: Auto-remove if subtotal drops.
-                if (subtotal < coupon.min_order_value) {
-                    setCoupon(null);
-                }
-            }
-        }
-    }, [cart, coupon]);
+    // Active coupon is valid only if cartSubtotal meets min_order_value
+    const activeCoupon = (coupon && cartSubtotal >= coupon.min_order_value) ? coupon : null;
 
-
-    const addToCart = (product: Product, size: string, quantity: number = 1) => {
+    const addToCart = (
+        product: Product,
+        size: string,
+        quantity: number = 1,
+        color?: string,
+        variantId?: string
+    ) => {
         setCart(prev => {
-            const existing = prev.find(item => item.id === product.id && item.selectedSize === size);
+            const existing = prev.find(item =>
+                item.id === product.id &&
+                item.selectedSize === size &&
+                (!color || item.selectedColor === color)
+            );
+
             if (existing) {
                 return prev.map(item =>
                     item.cartId === existing.cartId
@@ -79,8 +70,30 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         : item
                 );
             }
-            return [...prev, { ...product, cartId: crypto.randomUUID(), selectedSize: size, quantity }];
+
+            const mainImage = product.images?.[0]?.image_url || '/src/assets/product-placeholder.png';
+
+            const newItem: CartItem = {
+                cartId: `${product.id}-${size}-${color || 'default'}-${Date.now()}`,
+                id: product.id,
+                variantId,
+                name: product.name,
+                slug: product.slug,
+                price: product.price,
+                sale_price: product.sale_price,
+                selectedSize: size,
+                selectedColor: color,
+                quantity,
+                stock: product.stock,
+                sku: product.sku,
+                fabric: product.fabric,
+                image: mainImage,
+                images: product.images
+            };
+
+            return [...prev, newItem];
         });
+
         setIsCartOpen(true);
     };
 
@@ -103,107 +116,56 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCoupon(null);
     };
 
-    const cartSubtotal = cart.reduce((total, item) => {
-        const price = item.sale_price || item.price;
-        return total + (price * item.quantity);
-    }, 0);
-
-    // Calculate Discount
+    // Calculate discount amount
     let discountAmount = 0;
-    if (coupon) {
-        if (coupon.discount_type === 'FIXED') {
-            discountAmount = coupon.discount_value;
-        } else if (coupon.discount_type === 'PERCENTAGE') {
-            discountAmount = (cartSubtotal * coupon.discount_value) / 100;
-            if (coupon.max_discount_amount && discountAmount > coupon.max_discount_amount) {
-                discountAmount = coupon.max_discount_amount;
+    if (activeCoupon) {
+        if (activeCoupon.discount_type === 'FIXED') {
+            discountAmount = activeCoupon.discount_value;
+        } else if (activeCoupon.discount_type === 'PERCENTAGE') {
+            discountAmount = (cartSubtotal * activeCoupon.discount_value) / 100;
+            if (activeCoupon.max_discount_amount && discountAmount > activeCoupon.max_discount_amount) {
+                discountAmount = activeCoupon.max_discount_amount;
             }
         }
 
-        // Final sanity check: if subtotal < min_order, discount is 0 (though we try to remove it in useEffect)
-        if (cartSubtotal < coupon.min_order_value) {
-            discountAmount = 0;
+        if (discountAmount > cartSubtotal) {
+            discountAmount = cartSubtotal;
         }
-
-        // Ensure discount doesn't exceed total (mostly relevant for fixed discounts)
-        if (discountAmount > cartSubtotal) discountAmount = cartSubtotal;
     }
 
-    const cartTotal = Math.max(0, cartSubtotal - discountAmount);
+    const cartTotal = Math.max(0, cartSubtotal - Math.round(discountAmount));
 
-    const applyCoupon = async (code: string): Promise<{ success: boolean; message: string }> => {
-        if (!code) return { success: false, message: 'Please enter a code' };
-
-        try {
-            // 1. Fetch Coupon Logic
-            const { data, error } = await supabase
-                .from('coupons')
-                .select('*')
-                .eq('code', code)
-                .eq('is_active', true)
-                .single();
-
-            if (error || !data) {
-                return { success: false, message: 'Invalid coupon code' };
-            }
-
-            const couponData = data;
-
-            // 2. Validate Expiry
-            const now = new Date();
-            if (couponData.start_date && new Date(couponData.start_date) > now) {
-                return { success: false, message: 'Coupon not yet active' };
-            }
-            if (couponData.end_date && new Date(couponData.end_date) < now) {
-                return { success: false, message: 'Coupon expired' };
-            }
-
-            // 3. Validate Usage Limit
-            if (couponData.usage_limit && couponData.used_count >= couponData.usage_limit) {
-                return { success: false, message: 'Coupon usage limit reached' };
-            }
-
-            // 4. Validate Min Order Value
-            if (cartSubtotal < couponData.min_order_value) {
-                return { success: false, message: `Minimum order value of ₹${couponData.min_order_value} required` };
-            }
-
-            setCoupon({
-                code: couponData.code,
-                discount_type: couponData.discount_type,
-                discount_value: couponData.discount_value,
-                min_order_value: couponData.min_order_value,
-                max_discount_amount: couponData.max_discount_amount
-            });
-
-            return { success: true, message: 'Coupon applied successfully!' };
-
-        } catch (err) {
-            console.error(err);
-            return { success: false, message: 'Error checking coupon' };
+    const applyCouponHandler = async (code: string): Promise<{ success: boolean; message: string }> => {
+        const result = await validateCoupon(code, cartSubtotal);
+        if (result.valid && result.coupon) {
+            setCoupon(result.coupon);
+            return { success: true, message: result.message };
         }
+        return { success: false, message: result.message };
     };
 
-    const removeCoupon = () => {
+    const removeCouponHandler = () => {
         setCoupon(null);
     };
 
     return (
-        <CartContext.Provider value={{
-            cart,
-            addToCart,
-            removeFromCart,
-            updateQuantity,
-            clearCart,
-            isCartOpen,
-            setIsCartOpen,
-            cartTotal,
-            cartSubtotal,
-            coupon,
-            discountAmount,
-            applyCoupon,
-            removeCoupon
-        }}>
+        <CartContext.Provider
+            value={{
+                cart,
+                addToCart,
+                removeFromCart,
+                updateQuantity,
+                clearCart,
+                isCartOpen,
+                setIsCartOpen,
+                cartTotal,
+                cartSubtotal,
+                coupon: activeCoupon,
+                discountAmount: Math.round(discountAmount),
+                applyCoupon: applyCouponHandler,
+                removeCoupon: removeCouponHandler
+            }}
+        >
             {children}
         </CartContext.Provider>
     );

@@ -1,7 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { getProducts } from '../services/productService';
+import { getCategories } from '../services/categoryService';
 import type { Product, Category } from '../types';
 import ProductCard from '../components/ProductCard';
 import { Filter, ShoppingBag } from 'lucide-react';
@@ -18,7 +18,6 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // Initialize from Prop OR URL Query Param OR 'all'
     const initialCategory = forcedCategory || searchParams.get('category') || 'all';
     const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
 
@@ -26,25 +25,23 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
     useEffect(() => {
-        // Sync with Prop or URL if they change externally
         const paramCategory = searchParams.get('category');
 
         if (forcedCategory) {
             setSelectedCategory(forcedCategory);
         } else if (paramCategory && categories.length > 0) {
-            // Handle URL changes - Param can be Slug (Header/Footer) or ID (Home)
             if (paramCategory === 'all') {
                 setSelectedCategory('all');
             } else {
-                // 1. Try finding by Slug (Preferred)
                 const matchedSlug = categories.find(c => c.slug === paramCategory);
                 if (matchedSlug) {
                     setSelectedCategory(matchedSlug.id);
                 } else {
-                    // 2. Fallback: Param might be an ID
                     const matchedId = categories.find(c => c.id === paramCategory);
                     if (matchedId) {
                         setSelectedCategory(matchedId.id);
+                    } else {
+                        setSelectedCategory(paramCategory);
                     }
                 }
             }
@@ -57,40 +54,35 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
 
     const fetchData = async () => {
         setLoading(true);
-        const { data: catData } = await supabase.from('categories').select('*');
+        try {
+            const [catData, prodData] = await Promise.all([
+                getCategories(),
+                getProducts()
+            ]);
 
-        let query = supabase.from('products').select('*, product_images(*)');
-
-        // Only show launched products
-        const today = new Date().toISOString().split('T')[0];
-        query = query.lte('launch_date', today);
-
-        const { data: prodData } = await query;
-
-        if (catData) setCategories(catData);
-        if (prodData) {
-            const mappedProducts = prodData.map((p: any) => ({
-                ...p,
-                images: p.product_images
-            }));
-            setProducts(mappedProducts);
+            if (catData) setCategories(catData);
+            if (prodData) setProducts(prodData);
+        } catch (error) {
+            console.error('Error fetching shop data:', error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     // Derived state for filtering/sorting
     const filteredProducts = products
-        .filter(p => selectedCategory === 'all' || p.category_id === selectedCategory)
+        .filter(p => {
+            if (selectedCategory === 'all') return true;
+            return p.category_id === selectedCategory || p.category_slug === selectedCategory;
+        })
         .sort((a, b) => {
-            if (sortBy === 'price-low') return a.price - b.price;
-            if (sortBy === 'price-high') return b.price - a.price;
-            // newest default
-            return new Date(b.launch_date).getTime() - new Date(a.launch_date).getTime();
+            if (sortBy === 'price-low') return (a.sale_price || a.price) - (b.sale_price || b.price);
+            if (sortBy === 'price-high') return (b.sale_price || b.price) - (a.sale_price || a.price);
+            return new Date(b.launch_date || b.created_at || 0).getTime() - new Date(a.launch_date || a.created_at || 0).getTime();
         });
 
     return (
         <div className="min-h-screen bg-neutral">
-
             {/* Header Banner */}
             <div className="bg-neutral py-12 md:py-20 text-center px-4">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold text-dark mb-4">{pageTitle || 'The Collection'}</h1>
@@ -116,7 +108,7 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
                                 <button
                                     key={cat.id}
                                     onClick={() => setSelectedCategory(cat.id)}
-                                    className={`text-sm uppercase tracking-wide whitespace-nowrap transition-colors ${selectedCategory === cat.id ? 'text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-dark'}`}
+                                    className={`text-sm uppercase tracking-wide whitespace-nowrap transition-colors ${selectedCategory === cat.id || selectedCategory === cat.slug ? 'text-primary font-bold border-b-2 border-primary' : 'text-gray-500 hover:text-dark'}`}
                                 >
                                     {cat.name}
                                 </button>
@@ -165,7 +157,7 @@ const Shop: React.FC<ShopProps> = ({ forcedCategory, pageTitle, pageDescription 
                                             <button
                                                 key={cat.id}
                                                 onClick={() => setSelectedCategory(cat.id)}
-                                                className={`px-3 py-1 text-xs border rounded-full ${selectedCategory === cat.id ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200'}`}
+                                                className={`px-3 py-1 text-xs border rounded-full ${selectedCategory === cat.id || selectedCategory === cat.slug ? 'bg-primary text-white border-primary' : 'bg-white text-gray-600 border-gray-200'}`}
                                             >
                                                 {cat.name}
                                             </button>

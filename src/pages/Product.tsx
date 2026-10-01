@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import type { Product } from '../types';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { getProductBySlug } from '../services/productService';
+import { getProductReviews } from '../services/reviewService';
+import type { Product, ProductVariant } from '../types';
 import { useCart } from '../context/CartContext';
 import { Star, Truck, ShieldCheck } from 'lucide-react';
 import Reviews from '../components/Reviews';
 
 const ProductPage: React.FC = () => {
     const { slug } = useParams<{ slug: string }>();
+    const navigate = useNavigate();
     const [product, setProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedSize, setSelectedSize] = useState<string>('');
+    const [selectedColor, setSelectedColor] = useState<string>('');
     const [quantity, setQuantity] = useState<number>(1);
     const [activeImage, setActiveImage] = useState<string>('');
     const { addToCart } = useCart();
@@ -27,26 +30,32 @@ const ProductPage: React.FC = () => {
         if (product?.id) fetchReviewStats(product.id);
     }, [product]);
 
-    const fetchProduct = async (slug: string) => {
+    const fetchProduct = async (productSlug: string) => {
         setLoading(true);
         setError(null);
         try {
-            const { data, error } = await supabase
-                .from('products')
-                .select('*, product_images(*)')
-                .eq('slug', slug)
-                .single();
+            const data = await getProductBySlug(productSlug);
+            if (!data) {
+                setError('Product not found');
+                return;
+            }
 
-            if (error) throw error;
-
-            // Transform data to match interface if needed (mock logic for images since schema is separate)
-            // For now, assuming product_images array comes joined or we use a placeholder if empty
-            const images = data.product_images?.length ? data.product_images : [{ image_url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000' }];
+            const images = data.images && data.images.length > 0
+                ? data.images
+                : [{ id: 'placeholder', image_url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000', order_index: 0 }];
 
             setProduct({ ...data, images });
             setActiveImage(images[0].image_url);
+
+            // Default size selection if available
+            if (data.sizes && data.sizes.length > 0) {
+                setSelectedSize(data.sizes[0]);
+            }
+            if (data.colors && data.colors.length > 0) {
+                setSelectedColor(data.colors[0]);
+            }
         } catch (err) {
-            console.error(err);
+            console.error('Error fetching product:', err);
             setError('Product not found');
         } finally {
             setLoading(false);
@@ -54,19 +63,29 @@ const ProductPage: React.FC = () => {
     };
 
     const fetchReviewStats = async (productId: string) => {
-        const { data } = await supabase
-            .from('reviews')
-            .select('rating')
-            .eq('product_id', productId);
-
-        if (data && data.length > 0) {
-            const total = data.reduce((acc, curr) => acc + curr.rating, 0);
-            setReviewStats({
-                count: data.length,
-                average: total / data.length
-            });
+        try {
+            const reviews = await getProductReviews(productId);
+            if (reviews && reviews.length > 0) {
+                const total = reviews.reduce((acc, curr) => acc + curr.rating, 0);
+                setReviewStats({
+                    count: reviews.length,
+                    average: Math.round((total / reviews.length) * 10) / 10
+                });
+            }
+        } catch (e) {
+            console.error('Error fetching review stats:', e);
         }
     };
+
+    // Find active variant matching selected size and color
+    const matchedVariant: ProductVariant | undefined = product?.variants?.find(v => {
+        const matchSize = !v.size || v.size === selectedSize;
+        const matchColor = !selectedColor || !v.color || v.color === selectedColor;
+        return matchSize && matchColor;
+    });
+
+    const currentStock = matchedVariant ? matchedVariant.stock : (product?.stock || 0);
+    const isOutOfStock = currentStock <= 0;
 
     const handleAddToCart = () => {
         if (!product) return;
@@ -74,28 +93,48 @@ const ProductPage: React.FC = () => {
             alert('Please select a size');
             return;
         }
-        addToCart(product, selectedSize, quantity);
+        addToCart(product, selectedSize, quantity, selectedColor, matchedVariant?.id);
+    };
+
+    const handleBuyNow = () => {
+        if (!product) return;
+        if (!selectedSize) {
+            alert('Please select a size');
+            return;
+        }
+        addToCart(product, selectedSize, quantity, selectedColor, matchedVariant?.id);
+        navigate('/checkout');
     };
 
     const scrollToReviews = () => {
         document.getElementById('reviews-section')?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-neutral"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
-    if (error || !product) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-neutral">
-            <h2 className="text-2xl font-serif font-bold mb-4">Product Not Found</h2>
-            <Link to="/shop" className="btn-primary">Back to Shop</Link>
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-neutral">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+        );
+    }
 
-    const price = product.sale_price || product.price;
-    const originalPrice = product.sale_price ? product.price : null;
-    const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+    if (error || !product) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-neutral">
+                <h2 className="text-2xl font-serif font-bold mb-4">Product Not Found</h2>
+                <Link to="/shop" className="btn-primary">Back to Shop</Link>
+            </div>
+        );
+    }
+
+    const price = matchedVariant?.price || product.sale_price || product.price;
+    const originalPrice = (product.sale_price || matchedVariant?.price) ? (product.compare_at_price || product.price) : null;
+    const discount = originalPrice && originalPrice > price
+        ? Math.round(((originalPrice - price) / originalPrice) * 100)
+        : 0;
 
     return (
         <div className="min-h-screen bg-neutral pb-20 overflow-x-hidden">
-
             <div className="container-custom pt-8 pb-16">
                 {/* Breadcrumbs */}
                 <div className="text-xs tracking-widest uppercase text-gray-500 mb-8 flex flex-wrap items-center gap-y-2">
@@ -132,7 +171,7 @@ const ProductPage: React.FC = () => {
                                         onClick={() => setActiveImage(img.image_url)}
                                         className={`w-20 lg:w-full aspect-[3/4] overflow-hidden border transition-all flex-shrink-0 ${activeImage === img.image_url ? 'border-black opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
                                     >
-                                        <img src={img.image_url} className="w-full h-full object-cover" />
+                                        <img src={img.image_url} alt="" className="w-full h-full object-cover" />
                                     </button>
                                 ))}
                             </div>
@@ -146,7 +185,9 @@ const ProductPage: React.FC = () => {
                             <div className="flex items-center gap-4 mt-4">
                                 <div className="flex items-baseline gap-3">
                                     <span className="text-xl font-medium text-dark">₹{price}</span>
-                                    {originalPrice && <span className="text-base text-gray-400 line-through">₹{originalPrice}</span>}
+                                    {originalPrice && originalPrice > price && (
+                                        <span className="text-base text-gray-400 line-through">₹{originalPrice}</span>
+                                    )}
                                 </div>
                                 <div className="h-4 w-px bg-gray-200"></div>
                                 <div
@@ -170,27 +211,57 @@ const ProductPage: React.FC = () => {
                             </div>
                         </div>
 
-
+                        {/* Color Selector (if product has colors) */}
+                        {product.colors && product.colors.length > 0 && (
+                            <div className="mb-6">
+                                <span className="font-semibold text-xs uppercase tracking-widest text-gray-900 mb-3 block">
+                                    Color: <span className="font-normal text-gray-600">{selectedColor}</span>
+                                </span>
+                                <div className="flex flex-wrap gap-2">
+                                    {product.colors.map(color => (
+                                        <button
+                                            key={color}
+                                            onClick={() => setSelectedColor(color)}
+                                            className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${selectedColor === color
+                                                ? 'bg-dark text-white border-dark'
+                                                : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
+                                                }`}
+                                        >
+                                            {color}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Select Size */}
                         <div className="mb-8">
                             <div className="flex justify-between items-center mb-3">
                                 <span className="font-semibold text-xs uppercase tracking-widest text-gray-900">Size</span>
-                                <button className="text-xs text-gray-500 underline underline-offset-4 hover:text-black transition-colors">Size Guide</button>
+                                <Link to="/size-guide" className="text-xs text-gray-500 underline underline-offset-4 hover:text-black transition-colors">Size Guide</Link>
                             </div>
                             <div className="flex flex-wrap gap-3">
-                                {product.sizes.map(size => (
-                                    <button
-                                        key={size}
-                                        onClick={() => setSelectedSize(size)}
-                                        className={`h-10 min-w-[3rem] px-3 flex items-center justify-center border text-sm transition-all ${selectedSize === size
-                                            ? 'bg-primary text-white border-primary'
-                                            : 'bg-white text-dark border-gray-200 hover:border-primary'
-                                            }`}
-                                    >
-                                        {size}
-                                    </button>
-                                ))}
+                                {product.sizes.map(size => {
+                                    // Check variant stock for this specific size
+                                    const variantForSize = product.variants?.find(v => v.size === size && (!selectedColor || v.color === selectedColor));
+                                    const sizeOutOfStock = variantForSize ? variantForSize.stock <= 0 : false;
+
+                                    return (
+                                        <button
+                                            key={size}
+                                            disabled={sizeOutOfStock}
+                                            onClick={() => setSelectedSize(size)}
+                                            className={`h-10 min-w-[3rem] px-3 flex items-center justify-center border text-sm transition-all ${selectedSize === size
+                                                ? 'bg-primary text-white border-primary shadow-sm'
+                                                : sizeOutOfStock
+                                                    ? 'bg-gray-100 text-gray-300 border-gray-200 line-through cursor-not-allowed'
+                                                    : 'bg-white text-dark border-gray-200 hover:border-primary'
+                                                }`}
+                                        >
+                                            {size}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
 
@@ -207,68 +278,73 @@ const ProductPage: React.FC = () => {
                                     </button>
                                     <div className="w-10 text-center text-sm font-medium">{quantity}</div>
                                     <button
-                                        onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
-                                        className="flex-1 h-full flex items-center justify-center hover:bg-primary hover:text-white transition-colors"
+                                        onClick={() => setQuantity(q => Math.min(Math.max(1, currentStock), q + 1))}
+                                        disabled={quantity >= currentStock}
+                                        className="flex-1 h-full flex items-center justify-center hover:bg-primary hover:text-white transition-colors disabled:opacity-50"
                                     >
                                         +
                                     </button>
                                 </div>
                             </div>
                             <span className="text-xs text-red-600 font-medium mt-2 block">
-                                {product.stock > 0
-                                    ? product.stock < 20
-                                        ? `Only ${product.stock} pieces left!`
-                                        : `Limited Stock: ${product.stock} pieces available`
+                                {currentStock > 0
+                                    ? currentStock < 10
+                                        ? `Only ${currentStock} pieces left in stock!`
+                                        : `Available stock: ${currentStock} pieces`
                                     : 'Out of Stock'
                                 }
                             </span>
                         </div>
 
-
                         {/* Actions */}
-                        <div className="flex gap-4 mb-10 w-full">
+                        <div className="flex flex-col sm:flex-row gap-3 mb-10 w-full">
                             <button
                                 onClick={handleAddToCart}
-                                disabled={product.stock === 0}
+                                disabled={isOutOfStock}
                                 className="flex-1 bg-primary text-white py-4 font-medium hover:bg-secondary transition-all uppercase tracking-widest text-xs disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+                                {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
                             </button>
-                            <button className="w-12 flex items-center justify-center border border-gray-200 hover:border-black transition-colors text-gray-400 hover:text-black flex-shrink-0">
-                                <Star size={18} />
+                            <button
+                                onClick={handleBuyNow}
+                                disabled={isOutOfStock}
+                                className="flex-1 bg-dark text-white py-4 font-medium hover:bg-opacity-90 transition-all uppercase tracking-widest text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Buy Now
                             </button>
                         </div>
 
-                        {/* Details Accordion (Static for now, can be dynamic) */}
+                        {/* Details Accordion */}
                         <div className="divide-y divide-gray-100 border-t border-gray-100 w-full">
-                            <details className="group py-4 cursor-pointer">
+                            <details className="group py-4 cursor-pointer" open>
                                 <summary className="flex items-center justify-between font-medium text-sm text-dark list-none">
                                     Product Details
                                     <span className="transition group-open:rotate-180">
-                                        <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                        <svg fill="none" height="24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
                                     </span>
                                 </summary>
                                 <div className="text-gray-500 text-sm mt-3 leading-relaxed space-y-2">
                                     <div className="prose text-gray-500 mb-4 max-w-none text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description || '' }} />
                                     {product.fabric && <p><span className="text-dark font-medium">Fabric:</span> {product.fabric}</p>}
                                     {product.care && <p><span className="text-dark font-medium">Care:</span> {product.care}</p>}
+                                    {product.sku && <p><span className="text-dark font-medium">SKU:</span> {product.sku}</p>}
                                 </div>
                             </details>
                             <details className="group py-4 cursor-pointer">
                                 <summary className="flex items-center justify-between font-medium text-sm text-dark list-none">
                                     Shipping & Returns
                                     <span className="transition group-open:rotate-180">
-                                        <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
+                                        <svg fill="none" height="24" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24"><path d="M6 9l6 6 6-6"></path></svg>
                                     </span>
                                 </summary>
                                 <div className="text-gray-500 text-sm mt-3 leading-relaxed">
                                     <div className="flex items-start gap-3 mb-2">
-                                        <Truck size={18} className="mt-0.5" />
-                                        <span>Free standard shipping on orders over ₹1999. Estimated delivery 3-5 business days.</span>
+                                        <Truck size={18} className="mt-0.5 text-primary" />
+                                        <span>Free standard shipping on orders over ₹2000. Estimated delivery 3-5 business days via Shiprocket.</span>
                                     </div>
                                     <div className="flex items-start gap-3">
-                                        <ShieldCheck size={18} className="mt-0.5" />
-                                        <span>Easy resets within 7 days of delivery.</span>
+                                        <ShieldCheck size={18} className="mt-0.5 text-primary" />
+                                        <span>Hassle-free returns within 7 days of delivery.</span>
                                     </div>
                                 </div>
                             </details>
@@ -278,9 +354,8 @@ const ProductPage: React.FC = () => {
 
                 {/* Reviews Section */}
                 <Reviews productId={product.id} />
-
             </div>
-        </div >
+        </div>
     );
 };
 

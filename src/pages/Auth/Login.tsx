@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { loginCustomer } from '../../services/authService';
 import { Loader2 } from 'lucide-react';
 
 const Login: React.FC = () => {
@@ -19,15 +19,16 @@ const Login: React.FC = () => {
         setError(null);
 
         try {
-            const { error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
-
-            if (error) throw error;
+            await loginCustomer(email, password);
             navigate(from, { replace: true });
         } catch (err: any) {
-            setError(err.message || 'Failed to login');
+            let msg = 'Failed to sign in. Please verify your credentials.';
+            if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+                msg = 'Invalid email or password.';
+            } else if (err.code === 'auth/too-many-requests') {
+                msg = 'Too many attempts. Please try again later.';
+            }
+            setError(msg);
         } finally {
             setLoading(false);
         }

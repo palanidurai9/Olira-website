@@ -1,11 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { X, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import type { Product } from '../types';
-
-import { supabase } from '../lib/supabase';
+import { getProducts } from '../services/productService';
 
 interface SearchModalProps {
     isOpen: boolean;
@@ -14,61 +12,50 @@ interface SearchModalProps {
 
 const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [mounted, setMounted] = useState(false);
     const [products, setProducts] = useState<Product[]>([]);
 
-
     useEffect(() => {
-        setMounted(true);
         if (isOpen) {
             document.body.style.overflow = 'hidden';
-            fetchProducts();
+            let isCancelled = false;
+            getProducts()
+                .then(data => {
+                    if (!isCancelled && data) {
+                        setProducts(data);
+                    }
+                })
+                .catch(e => console.error('Error fetching search products:', e));
+
+            return () => {
+                isCancelled = true;
+                document.body.style.overflow = 'unset';
+            };
         } else {
             document.body.style.overflow = 'unset';
-            // Clear search when closed if desired, or keep state
         }
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
     }, [isOpen]);
-
-    const fetchProducts = async () => {
-        // data field mapping for joins might depend on exact setup (images:product_images vs just product_images)
-        // Adjusting query to be safe, assuming foreign key setup matches the types or standard conventions
-        // If product_images is the table name and product_id is the FK.
-        const { data, error } = await supabase
-            .from('products')
-            .select('*, images:product_images(*)')
-            .order('launch_date', { ascending: false });
-
-        if (!error && data) {
-            setProducts(data);
-        }
-    };
 
     // Derived Lists
     const newArrivals = React.useMemo(() => {
         return products.slice(0, 4);
     }, [products]);
 
-    // Using "Featured" as a stand-in for "Recently Viewed" until history tracking is implemented
     const featuredProducts = React.useMemo(() => {
-        return products.filter(p => p.featured).slice(0, 4);
+        const feat = products.filter(p => p.featured);
+        return (feat.length > 0 ? feat : products).slice(0, 4);
     }, [products]);
 
-    // Search Logic
+    // Search Logic with debounce-friendly in-memory lookup
     const searchResults = React.useMemo(() => {
         if (!searchQuery.trim()) return [];
         const query = searchQuery.toLowerCase().trim();
         return products.filter(product =>
             product.name.toLowerCase().includes(query) ||
-            product.description?.toLowerCase().includes(query)
+            product.description?.toLowerCase().includes(query) ||
+            product.sku?.toLowerCase().includes(query) ||
+            product.tags?.some(t => t.toLowerCase().includes(query))
         );
     }, [products, searchQuery]);
-
-
-
-    if (!mounted) return null;
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -104,7 +91,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                 <form onSubmit={handleSearch} className="flex-1">
                                     <input
                                         type="text"
-                                        placeholder="Search"
+                                        placeholder="Search by name, kurti, saree, maxi..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                         className="w-full text-lg outline-none text-dark placeholder-gray-400 bg-transparent"
@@ -121,7 +108,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
 
                             {/* Scrollable Content */}
                             <div className="overflow-y-auto p-6 scrollbar-thin scrollbar-thumb-gray-200">
-
                                 {searchQuery ? (
                                     <div>
                                         <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">
@@ -134,7 +120,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                                     <Link to={`/product/${product.slug}`} key={`${product.id}-${idx}`} onClick={onClose} className="group cursor-pointer">
                                                         <div className="aspect-[3/4] overflow-hidden rounded-md bg-gray-100 mb-2">
                                                             <img
-                                                                src={product.images?.[0]?.image_url}
+                                                                src={product.images?.[0]?.image_url || '/src/assets/product-placeholder.png'}
                                                                 alt={product.name}
                                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                             />
@@ -157,13 +143,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                             <div className="flex flex-col items-center justify-center py-12 text-gray-400">
                                                 <Search className="w-12 h-12 mb-4 opacity-20" />
                                                 <p className="text-lg font-medium text-gray-500">No products found</p>
-                                                <p className="text-sm">Try searching for "Kurti", "Saree", or "Suit"</p>
+                                                <p className="text-sm">Try searching for "Kurti", "Maxi", or "Tops"</p>
                                             </div>
                                         )}
                                     </div>
                                 ) : (
                                     <>
-                                        {/* Featured Products (was Recently Viewed) */}
+                                        {/* Featured Products */}
                                         <div className="mb-8">
                                             <div className="flex justify-between items-center mb-4">
                                                 <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Featured Products</h3>
@@ -173,7 +159,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                                     <Link to={`/product/${product.slug}`} key={product.id} onClick={onClose} className="group cursor-pointer">
                                                         <div className="aspect-[3/4] overflow-hidden rounded-md bg-gray-100 mb-2">
                                                             <img
-                                                                src={product.images?.[0]?.image_url}
+                                                                src={product.images?.[0]?.image_url || '/src/assets/product-placeholder.png'}
                                                                 alt={product.name}
                                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                             />
@@ -204,7 +190,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                                     <Link to={`/product/${product.slug}`} key={product.id} onClick={onClose} className="group cursor-pointer">
                                                         <div className="aspect-[3/4] overflow-hidden rounded-md bg-gray-100 mb-2">
                                                             <img
-                                                                src={product.images?.[0]?.image_url}
+                                                                src={product.images?.[0]?.image_url || '/src/assets/product-placeholder.png'}
                                                                 alt={product.name}
                                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                             />
@@ -221,7 +207,6 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
                                         </div>
                                     </>
                                 )}
-
                             </div>
                         </motion.div>
                     </div>

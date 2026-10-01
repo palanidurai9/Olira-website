@@ -1,19 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { supabase } from '../lib/supabase';
-import { ArrowLeft, Loader2, CheckCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { createCodOrder, initializeRazorpayOrder, verifyAndCompleteRazorpayPayment } from '../services/orderService';
+import { getUserAddresses } from '../services/authService';
+import type { Address } from '../types';
+import { ArrowLeft, Loader2, CheckCircle, CreditCard, Banknote } from 'lucide-react';
+
+declare global {
+    interface Window {
+        Razorpay: any;
+    }
+}
 
 const Checkout: React.FC = () => {
     const { cart, cartTotal, clearCart, cartSubtotal, discountAmount, coupon, applyCoupon, removeCoupon } = useCart();
+    const { user, profile } = useAuth();
     const navigate = useNavigate();
+
     const [loading, setLoading] = useState(false);
-    const [success, setSuccess] = useState(false);
+    const [successOrder, setSuccessOrder] = useState<any>(null);
+    const [paymentMethod, setPaymentMethod] = useState<'COD' | 'ONLINE'>('COD');
+
+    // Saved Addresses
+    const [savedAddresses, setSavedAddresses] = useState<Address[]>([]);
 
     // Coupon State
     const [couponCode, setCouponCode] = useState('');
     const [couponLoading, setCouponLoading] = useState(false);
     const [couponMessage, setCouponMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+    // Form State
+    const [formData, setFormData] = useState({
+        fullName: profile?.fullName || '',
+        email: user?.email || '',
+        phone: profile?.phone || '',
+        address: '',
+        city: '',
+        pincode: '',
+    });
+
+    // Populate user profile info when available
+    useEffect(() => {
+        if (profile || user) {
+            setFormData(prev => ({
+                ...prev,
+                fullName: prev.fullName || profile?.fullName || '',
+                email: prev.email || user?.email || '',
+                phone: prev.phone || profile?.phone || ''
+            }));
+        }
+
+        if (user) {
+            getUserAddresses(user.uid).then(addrs => {
+                setSavedAddresses(addrs);
+                const defaultAddr = addrs.find(a => a.isDefault) || addrs[0];
+                if (defaultAddr) {
+                    setFormData(prev => ({
+                        ...prev,
+                        fullName: prev.fullName || defaultAddr.fullName,
+                        phone: prev.phone || defaultAddr.phone,
+                        address: defaultAddr.addressLine1 + (defaultAddr.addressLine2 ? `, ${defaultAddr.addressLine2}` : ''),
+                        city: defaultAddr.city,
+                        pincode: defaultAddr.pincode
+                    }));
+                }
+            });
+        }
+    }, [user, profile]);
+
+    // Load Razorpay script dynamically
+    useEffect(() => {
+        if (!document.getElementById('razorpay-script')) {
+            const script = document.createElement('script');
+            script.id = 'razorpay-script';
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.async = true;
+            document.body.appendChild(script);
+        }
+    }, []);
 
     const handleApplyCoupon = async () => {
         if (!couponCode.trim()) return;
@@ -28,97 +93,118 @@ const Checkout: React.FC = () => {
             } else {
                 setCouponMessage({ type: 'error', text: result.message });
             }
-        } catch (error) {
+        } catch {
             setCouponMessage({ type: 'error', text: 'Failed to apply coupon' });
         } finally {
             setCouponLoading(false);
         }
     };
 
-    // Form State
-    const [formData, setFormData] = useState({
-        fullName: '',
-        email: '',
-        phone: '',
-        address: '',
-        city: '',
-        pincode: '',
-    });
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const shippingFee = cartTotal >= 2000 || cartTotal === 0 ? 0 : 100;
+    const finalPayable = cartTotal + shippingFee;
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (cart.length === 0) return;
+
         setLoading(true);
 
-        try {
-            // Generate Order Number
-            const orderNumber = `ORD-${Date.now().toString().slice(-6)}`;
+        const orderParams = {
+            userId: user?.uid || 'guest',
+            customerName: formData.fullName,
+            phone: formData.phone,
+            email: formData.email,
+            address: formData.address,
+            city: formData.city,
+            pincode: formData.pincode,
+            items: cart,
+            subtotal: cartSubtotal,
+            discountAmount: discountAmount || 0,
+            shippingFee,
+            total: finalPayable,
+            couponCode: coupon?.code || null,
+            paymentMethod: paymentMethod === 'ONLINE' ? ('RAZORPAY' as const) : ('COD' as const)
+        };
 
-            // Create Order Payload
-            const orderPayload = {
-                order_number: orderNumber,
-                customer_name: formData.fullName,
-                phone: formData.phone,
-                email: formData.email, // Ensure email is passed if column exists
-                address: `${formData.address}, ${formData.city} - ${formData.pincode}`,
-                items: cart, // Storing full cart JSON
-                total: cartTotal,
-                subtotal: cartSubtotal,
-                discount_amount: discountAmount || 0,
-                coupon_code: coupon?.code || null,
-                payment_method: 'COD',
-                payment_status: 'PENDING',
-                order_status: 'PENDING'
-            };
-
-            const { error } = await supabase.from('orders').insert(orderPayload);
-
-            if (error) throw error;
-
-            // Reduce Stock for each item
-            for (const item of cart) {
-                const { data: productData } = await supabase
-                    .from('products')
-                    .select('stock')
-                    .eq('id', item.id)
-                    .single();
-
-                if (productData) {
-                    const newStock = Math.max(0, productData.stock - item.quantity);
-                    await supabase
-                        .from('products')
-                        .update({ stock: newStock })
-                        .eq('id', item.id);
-                }
-            }
-
-            // Increase Coupon Usage Count
-            if (coupon) {
-                try {
-                    await supabase.rpc('increment_coupon_usage', { coupon_code: coupon.code });
-                } catch (rpcError) {
-                    // Ignore if RPC missing or error
-                }
-            }
-
-            // Success
-            setSuccess(true);
-            setTimeout(() => {
+        if (paymentMethod === 'COD') {
+            try {
+                const created = await createCodOrder(orderParams);
+                setSuccessOrder(created);
                 clearCart();
-            }, 500);
+            } catch (error: any) {
+                alert('Order failed: ' + (error.message || 'Unknown error'));
+            } finally {
+                setLoading(false);
+            }
+        } else {
+            // Razorpay Payment Flow
+            try {
+                const razorpayData = await initializeRazorpayOrder(orderParams);
+                const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_placeholder';
 
-        } catch (error: any) {
-            alert('Order failed: ' + error.message);
-        } finally {
-            setLoading(false);
+                if (!window.Razorpay) {
+                    alert('Razorpay SDK failed to load. Please check your internet connection.');
+                    setLoading(false);
+                    return;
+                }
+
+                const options = {
+                    key: razorpayKey,
+                    amount: razorpayData.amount,
+                    currency: razorpayData.currency || 'INR',
+                    name: 'OLIRAA',
+                    description: `Order ${razorpayData.orderId}`,
+                    image: '/src/assets/olira-text-logo.png',
+                    order_id: razorpayData.razorpayOrderId.startsWith('order_') && razorpayData.razorpayOrderId.length > 10 ? razorpayData.razorpayOrderId : undefined,
+                    prefill: {
+                        name: formData.fullName,
+                        email: formData.email,
+                        contact: formData.phone
+                    },
+                    theme: {
+                        color: '#737c60'
+                    },
+                    handler: async function (response: any) {
+                        try {
+                            const verifiedOrder = await verifyAndCompleteRazorpayPayment({
+                                razorpayOrderId: response.razorpay_order_id || razorpayData.razorpayOrderId,
+                                razorpayPaymentId: response.razorpay_payment_id,
+                                razorpaySignature: response.razorpay_signature || '',
+                                orderParams
+                            });
+                            setSuccessOrder(verifiedOrder);
+                            clearCart();
+                        } catch (err: any) {
+                            alert('Payment verification failed: ' + err.message);
+                        } finally {
+                            setLoading(false);
+                        }
+                    },
+                    modal: {
+                        ondismiss: function () {
+                            setLoading(false);
+                        }
+                    }
+                };
+
+                const rzp = new window.Razorpay(options);
+                rzp.on('payment.failed', function (response: any) {
+                    alert('Payment Failed: ' + (response.error.description || 'Transaction cancelled'));
+                    setLoading(false);
+                });
+                rzp.open();
+            } catch (err: any) {
+                alert('Could not start online payment: ' + err.message);
+                setLoading(false);
+            }
         }
     };
 
-    if (cart.length === 0 && !success) {
-        // Empty cart redirect
+    if (cart.length === 0 && !successOrder) {
         return (
             <div className="min-h-screen bg-neutral flex flex-col items-center justify-center p-4">
                 <p className="text-gray-500 mb-4">Your cart is empty.</p>
@@ -127,18 +213,33 @@ const Checkout: React.FC = () => {
         );
     }
 
-    if (success) {
+    if (successOrder) {
         return (
             <div className="min-h-screen bg-neutral flex flex-col items-center justify-center p-4">
-                <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md w-full border border-gray-100">
+                <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md w-full border border-gray-100 animate-fade-in">
                     <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
                         <CheckCircle size={32} />
                     </div>
-                    <h2 className="text-2xl font-serif font-bold text-dark mb-2">Order Confirmed!</h2>
-                    <p className="text-gray-500 mb-8">Thank you, {formData.fullName}. Your order has been received and will be shipped shortly via Cash on Delivery.</p>
-                    <button onClick={() => navigate('/')} className="w-full btn-outline">
-                        Back to Home
-                    </button>
+                    <h2 className="text-2xl font-serif font-bold text-dark mb-1">Order Confirmed!</h2>
+                    <p className="text-sm font-mono text-primary font-bold mb-4">#{successOrder.order_number}</p>
+                    <p className="text-gray-500 text-sm mb-6">
+                        Thank you, {formData.fullName}. We have received your order and will prepare it for shipment shortly.
+                    </p>
+                    <div className="bg-gray-50 p-4 rounded-lg text-left text-xs text-gray-600 mb-6 space-y-1">
+                        <p><span className="font-semibold text-dark">Payment Method:</span> {successOrder.payment_method}</p>
+                        <p><span className="font-semibold text-dark">Total Amount:</span> ₹{successOrder.total}</p>
+                        <p><span className="font-semibold text-dark">Deliver to:</span> {successOrder.address}</p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        {user && (
+                            <button onClick={() => navigate('/account')} className="btn-primary w-full py-3">
+                                View Order in Account
+                            </button>
+                        )}
+                        <button onClick={() => navigate('/')} className="btn-outline w-full py-3">
+                            Back to Home
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -146,7 +247,6 @@ const Checkout: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-neutral">
-
             <div className="container-custom py-8">
                 <button onClick={() => navigate('/cart')} className="flex items-center text-gray-500 hover:text-dark mb-8 text-sm">
                     <ArrowLeft size={16} className="mr-2" /> Back to Cart
@@ -156,7 +256,41 @@ const Checkout: React.FC = () => {
                     {/* Form */}
                     <div className="flex-1">
                         <div className="bg-white p-6 md:p-8 rounded-lg shadow-sm border border-gray-100">
-                            <h2 className="text-xl font-serif font-bold text-dark mb-6">Shipping Details</h2>
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-serif font-bold text-dark">Shipping Details</h2>
+                                {!user && (
+                                    <span className="text-xs text-gray-400">
+                                        Checking out as Guest or <button onClick={() => navigate('/login')} className="text-primary underline">Sign In</button>
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Saved Addresses quick-select */}
+                            {savedAddresses.length > 0 && (
+                                <div className="mb-6 pb-6 border-b border-gray-100">
+                                    <label className="block text-xs uppercase font-bold text-gray-500 mb-2">Saved Addresses</label>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {savedAddresses.map(addr => (
+                                            <div
+                                                key={addr.id}
+                                                onClick={() => setFormData({
+                                                    fullName: addr.fullName,
+                                                    phone: addr.phone,
+                                                    email: formData.email,
+                                                    address: addr.addressLine1 + (addr.addressLine2 ? `, ${addr.addressLine2}` : ''),
+                                                    city: addr.city,
+                                                    pincode: addr.pincode
+                                                })}
+                                                className="p-3 border rounded-lg cursor-pointer hover:border-primary transition-all text-xs bg-gray-50/50"
+                                            >
+                                                <p className="font-bold text-dark">{addr.fullName} {addr.isDefault && <span className="text-primary font-normal">(Default)</span>}</p>
+                                                <p className="text-gray-500 line-clamp-1">{addr.addressLine1}</p>
+                                                <p className="text-gray-400">{addr.city} - {addr.pincode}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <form id="checkout-form" onSubmit={handleSubmit} className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -228,24 +362,47 @@ const Checkout: React.FC = () => {
                         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6">
                             <h3 className="font-serif font-bold text-dark mb-4">Payment Method</h3>
                             <div className="space-y-3">
-                                <label className="flex items-center p-4 border border-primary bg-primary/5 rounded-lg cursor-pointer">
-                                    <input type="radio" name="payment" checked readOnly className="text-primary focus:ring-primary" />
-                                    <span className="ml-3 font-medium text-dark">Cash on Delivery (COD)</span>
+                                <label
+                                    onClick={() => setPaymentMethod('COD')}
+                                    className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all ${paymentMethod === 'COD' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        checked={paymentMethod === 'COD'}
+                                        onChange={() => setPaymentMethod('COD')}
+                                        className="text-primary focus:ring-primary"
+                                    />
+                                    <Banknote size={18} className="ml-3 text-primary" />
+                                    <span className="ml-2 font-medium text-dark text-sm">Cash on Delivery (COD)</span>
                                 </label>
-                                <label className="flex items-center p-4 border border-gray-200 rounded-lg opacity-50 cursor-not-allowed">
-                                    <input type="radio" name="payment" disabled className="text-gray-300" />
-                                    <span className="ml-3 text-gray-400">Online Payment (Coming Soon)</span>
+                                <label
+                                    onClick={() => setPaymentMethod('ONLINE')}
+                                    className={`flex items-center p-4 border rounded-lg cursor-pointer transition-all ${paymentMethod === 'ONLINE' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'}`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="payment"
+                                        checked={paymentMethod === 'ONLINE'}
+                                        onChange={() => setPaymentMethod('ONLINE')}
+                                        className="text-primary focus:ring-primary"
+                                    />
+                                    <CreditCard size={18} className="ml-3 text-primary" />
+                                    <div className="ml-2">
+                                        <span className="font-medium text-dark text-sm block">UPI / Card / Netbanking</span>
+                                        <span className="text-[10px] text-gray-400">Powered by Razorpay</span>
+                                    </div>
                                 </label>
                             </div>
                         </div>
 
                         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                             <h3 className="font-serif font-bold text-dark mb-4">Order Summary</h3>
-                            <div className="space-y-2 mb-4 text-sm">
+                            <div className="space-y-2 mb-4 text-sm max-h-60 overflow-y-auto">
                                 {cart.map(item => (
-                                    <div key={item.cartId} className="flex justify-between text-gray-600">
-                                        <span>{item.name} x {item.quantity}</span>
-                                        <span>₹{(item.sale_price || item.price) * item.quantity}</span>
+                                    <div key={item.cartId} className="flex justify-between text-gray-600 text-xs">
+                                        <span className="truncate max-w-[200px]">{item.name} ({item.selectedSize}) x {item.quantity}</span>
+                                        <span className="font-medium">₹{(item.sale_price || item.price) * item.quantity}</span>
                                     </div>
                                 ))}
                             </div>
@@ -295,7 +452,7 @@ const Checkout: React.FC = () => {
                                 )}
                             </div>
 
-                            <div className="pt-4 border-t border-gray-100 space-y-2 mb-4">
+                            <div className="pt-4 border-t border-gray-100 space-y-2 mb-4 text-sm">
                                 <div className="flex justify-between text-gray-600">
                                     <span>Subtotal</span>
                                     <span>₹{cartSubtotal}</span>
@@ -308,22 +465,26 @@ const Checkout: React.FC = () => {
                                 )}
                                 <div className="flex justify-between text-gray-600">
                                     <span>Shipping</span>
-                                    <span className="text-green-600">Free</span>
+                                    {shippingFee === 0 ? (
+                                        <span className="text-green-600 font-medium">Free</span>
+                                    ) : (
+                                        <span>₹{shippingFee}</span>
+                                    )}
                                 </div>
                             </div>
 
                             <div className="pt-4 border-t border-gray-100 flex justify-between font-bold text-lg mb-6">
-                                <span>Total</span>
-                                <span>₹{cartTotal}</span>
+                                <span>Total Payable</span>
+                                <span>₹{finalPayable}</span>
                             </div>
 
                             <button
                                 type="submit"
                                 form="checkout-form"
                                 disabled={loading}
-                                className="w-full btn-primary py-4 flex items-center justify-center font-bold tracking-widest disabled:opacity-70 disabled:cursor-not-allowed"
+                                className="w-full btn-primary py-4 flex items-center justify-center font-bold tracking-widest disabled:opacity-70 disabled:cursor-not-allowed uppercase text-sm"
                             >
-                                {loading ? <Loader2 className="animate-spin" /> : 'Confirm Order'}
+                                {loading ? <Loader2 className="animate-spin" /> : paymentMethod === 'ONLINE' ? 'Pay with Razorpay' : 'Confirm Order'}
                             </button>
                         </div>
                     </div>

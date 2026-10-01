@@ -12,7 +12,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     // Placeholder image if no images uploaded
     const mainImage = product.images?.[0]?.image_url || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop';
 
-    const isNew = new Date(product.launch_date) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // New if launched in last 30 days
+    const isNew = Boolean(product.new_arrival);
     const isSale = !!product.sale_price && product.sale_price < product.price;
 
     return (

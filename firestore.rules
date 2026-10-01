@@ -1,0 +1,84 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'admin' ||
+        request.auth.token.role == 'superadmin' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    // USERS COLLECTION
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && request.auth.uid == userId && (!('role' in request.resource.data) || request.resource.data.role == 'customer');
+      allow update: if isOwner(userId) && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role'])) || isAdmin();
+      allow delete: if isAdmin();
+
+      // Customer Addresses
+      match /addresses/{addressId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+
+      // Customer Wishlist
+      match /wishlist/{productId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+    }
+
+    // PRODUCTS COLLECTION
+    match /products/{productId} {
+      // Public can read active products; Admins can read everything
+      allow read: if resource.data.status != 'inactive' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // CATEGORIES COLLECTION
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ORDERS COLLECTION
+    match /orders/{orderId} {
+      // Customers can read their own orders
+      allow read: if (isAuthenticated() && resource.data.userId == request.auth.uid) ||
+                     (isAuthenticated() && resource.data.email == request.auth.token.email) ||
+                     isAdmin();
+      // Allow order creation from checkout
+      allow create: if true;
+      // Status modifications restricted to admin or Cloud Functions
+      allow update, delete: if isAdmin();
+    }
+
+    // COUPONS COLLECTION
+    match /coupons/{couponId} {
+      // Anyone can read active coupons to validate at checkout
+      allow read: if resource.data.is_active == true || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // REVIEWS COLLECTION
+    match /reviews/{reviewId} {
+      allow read: if resource.data.status == 'approved' || isAdmin();
+      allow create: if isAuthenticated() || true;
+      allow update, delete: if isAdmin();
+    }
+
+    // ADMIN AUDIT LOGS
+    match /adminLogs/{logId} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Hero from '../components/Hero';
 import Craftsmanship from '../components/Craftsmanship';
-import { supabase } from '../lib/supabase';
+import { getNewArrivals } from '../services/productService';
+import { getCategories } from '../services/categoryService';
 import type { Product, Category } from '../types';
 import ProductCard from '../components/ProductCard';
 import { ArrowRight } from 'lucide-react';
@@ -31,24 +31,13 @@ const Home: React.FC = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Fetch New Arrivals (Top 4)
-                const { data: productsData } = await supabase
-                    .from('products')
-                    .select('*, product_images(*)')
-                    .order('launch_date', { ascending: false })
-                    .limit(4);
-
-                // Fetch Categories
-                const { data: categoriesData } = await supabase
-                    .from('categories')
-                    .select('*');
+                const [productsData, categoriesData] = await Promise.all([
+                    getNewArrivals(4),
+                    getCategories()
+                ]);
 
                 if (productsData) {
-                    const mappedProducts = productsData.map((p: any) => ({
-                        ...p,
-                        images: p.product_images
-                    }));
-                    setNewArrivals(mappedProducts);
+                    setNewArrivals(productsData);
                 }
 
                 if (categoriesData) {

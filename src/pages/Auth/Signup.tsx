@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { registerCustomer } from '../../services/authService';
 import { Loader2 } from 'lucide-react';
 
 const Signup: React.FC = () => {
@@ -25,39 +25,26 @@ const Signup: React.FC = () => {
             return;
         }
 
+        if (formData.password.length < 6) {
+            setError("Password should be at least 6 characters");
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
         try {
-            // 1. Sign Up
-            const { data: authData, error: authError } = await supabase.auth.signUp({
-                email: formData.email,
-                password: formData.password,
-            });
-
-            if (authError) throw authError;
-
-            if (authData.user) {
-                // 2. Create Profile
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .insert({
-                        id: authData.user.id,
-                        full_name: formData.fullName,
-                        role: 'customer'
-                    });
-
-                if (profileError) {
-                    console.error('Error creating profile:', profileError);
-                    // Continue anyway, maybe handle later or showing specific warning?
-                    // Ideally we should rollback or retry, but for MVP:
-                }
-
-                alert('Account created successfully! Please log in.');
-                navigate('/login');
-            }
+            await registerCustomer(formData.email, formData.password, formData.fullName);
+            alert('Account created successfully! You are now logged in.');
+            navigate('/account');
         } catch (err: any) {
-            setError(err.message || 'Failed to create account');
+            let msg = err.message || 'Failed to create account';
+            if (err.code === 'auth/email-already-in-use') {
+                msg = 'An account with this email address already exists.';
+            } else if (err.code === 'auth/weak-password') {
+                msg = 'Password is too weak. Please use a stronger password.';
+            }
+            setError(msg);
         } finally {
             setLoading(false);
         }
@@ -125,6 +112,7 @@ const Signup: React.FC = () => {
                             onChange={handleChange}
                             className="w-full px-4 py-3 rounded-md border border-gray-200 outline-none focus:border-primary transition-colors"
                             placeholder="••••••••"
+                            minLength={6}
                         />
                     </div>
 
